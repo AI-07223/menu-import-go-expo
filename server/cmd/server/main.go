@@ -42,7 +42,7 @@ func main() {
 	}
 	scanner := &menu.Scanner{Client: &http.Client{Timeout: 12 * time.Second}, RetryDelay: 300 * time.Millisecond}
 	if key := os.Getenv("OPENROUTER_API_KEY"); key != "" {
-		scanner.Providers = append(scanner.Providers, menu.Provider{Name: "OpenRouter", URL: "https://openrouter.ai/api/v1/chat/completions", Key: key, Model: env("OPENROUTER_MODEL", "qwen/qwen3-vl-32b-instruct")})
+		scanner.Providers = append(scanner.Providers, menu.Provider{Name: "OpenRouter", URL: "https://openrouter.ai/api/v1/chat/completions", Key: key, Model: env("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite")})
 	}
 	if key := os.Getenv("MISTRAL_API_KEY"); key != "" {
 		scanner.Providers = append(scanner.Providers, menu.Provider{Name: "Mistral", URL: "https://api.mistral.ai/v1/chat/completions", Key: key, Model: env("MISTRAL_MODEL", "pixtral-12b-2409"), Mistral: true})

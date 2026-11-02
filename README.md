@@ -1,10 +1,8 @@
 # Menu Review — Go / GraphQL / Expo / PostgreSQL
 
-A focused reimplementation of a restaurant menu-import workflow in the technologies named in Sticker Mule's software-engineer vacancy. It is a new AI-assisted sample, not a claim of prior production Go or Expo experience.
+A restaurant owner can turn a photographed menu into an editable draft, compare it with the original, and save the reviewed dishes together. The Go service treats model output as untrusted. The catalog supplies artwork and optional name suggestions while the restaurant keeps its own prices.
 
-**Photo → untrusted draft → owner review → atomic PostgreSQL save.** The sample includes a clearly labelled recorded demo so it can be reviewed without a paid AI key.
-
-[Try the hosted menu review demo](https://menu-review.smartmade.site/). Review a scanned draft or upload a menu for manual review. The ten-item house catalog supplies illustrative photos for exact dish-name matches. Other dishes remain editable and can receive a custom photo during verification. The Docker version below adds live photo extraction and PostgreSQL persistence.
+[Try the hosted demo](https://menu-review.smartmade.site/) and choose **Review illustrated menu**. Change the price of a familiar dish, then add one outside the catalog. Both appear in the saved menu. The hosted demo runs in your browser and requires no credentials. The full application below uses Go, GraphQL, PostgreSQL and Expo. This is an AI-assisted reimplementation of an existing workflow.
 
 ## Run the complete application
 
@@ -14,9 +12,16 @@ Requires Docker with Compose. No host Go or Node installation is needed.
 docker compose up --build -d app
 ```
 
-Open http://localhost:8780. Enter the local-only operator token `local-review-only-change-me`, then select **Try recorded demo**. Edit a name or price, set a dietary label to “Needs review” to see save validation, resolve it, and save. Reload the page, enter the token again, and select **Reload saved menus** to verify persistence.
+Open http://localhost:8780. Enter the local-only operator token `local-review-only-change-me`, then select **Try recorded demo**. Edit a name or price, set a dietary label to “Needs review” to see save validation, resolve it, and save. Reload the page, enter the token again, and select **View saved menus** to verify persistence.
 
-The demo button replays recorded synthetic extraction output; it does not perform OCR. **Extract from photo** uses the actual Go vision adapter and requires a provider key supplied through the process environment or a local `.env` (see `.env.example`). PNG/JPEG images are sent to the configured provider. OpenRouter is tried first when configured, then Mistral. API calls may incur provider charges.
+## Configure live scanning
+
+1. In the repository root, copy `.env.example` to `.env` (PowerShell: `Copy-Item .env.example .env`; macOS/Linux: `cp .env.example .env`). If you already have a .env file, edit it in place.
+2. Set `OPENROUTER_API_KEY` in that file. The default model is `google/gemini-2.5-flash-lite`. To change it, set `OPENROUTER_MODEL` to an image-capable model. Configure Mistral only if you want a second provider to receive the image when the first fails.
+3. Run `docker compose up -d --build app`. After changing only a key or model, run `docker compose up -d app` again so the container receives the new configuration.
+4. Open http://localhost:8780, enter the operator token from your local configuration, and choose **Upload menu photo**. Use a fresh PNG/JPEG to exercise live extraction. Known reference files take the local lookup path.
+
+The browser sends the image to the Go service. Only that service receives the configured provider keys and calls the provider. Git and the Docker build context exclude local environment files. For managed hosting, inject the same variables as runtime secrets. Avoid sharing rendered Compose configuration because it contains resolved credentials.
 
 Stop containers with `docker compose stop`. The menu database is persisted in a named volume. The example credentials are for the loopback-only local demo, not a shared deployment.
 

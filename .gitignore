@@ -5,3 +5,7 @@ client/dist/
 *.log
 *.test
 **/.claude/
+
+**/.env
+**/.env.*
+!**/.env.example

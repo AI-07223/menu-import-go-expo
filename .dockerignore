@@ -5,3 +5,7 @@
 .env
 docs
 **/.git
+
+**/.env
+**/.env.*
+!**/.env.example

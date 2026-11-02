@@ -24,7 +24,6 @@ import {
 } from "./src/menu";
 
 import house from "./public/kitchen/catalog.json";
-import {scanWithReviewerKey} from "./src/reviewerScan";
 import catalog from "./src/catalog.json";
 import { closestDish } from "./src/matching";
 import citrus from "./src/citrus.json";
@@ -102,8 +101,6 @@ export default function App() {
 	const [busy, setBusy] = useState(false);
 	const [message, setMessage] = useState("");
 	const [screen,setScreen]=useState<"upload"|"review"|"saved">("upload");
-    const [liveKey,setLiveKey]=useState("");
-    const [showKey,setShowKey]=useState(false);
     const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
 	const illustrated = source === "ILLUSTRATED MENU · AUTHORED ANSWER KEY";
@@ -219,14 +216,14 @@ export default function App() {
                     reader.onerror = () => reject(new Error("Could not read this image."));
                     reader.readAsDataURL(file);
                 });
-                if (!match && publicDemo && !(showKey && liveKey.trim())) {
+                if (!match && publicDemo) {
                     setScreen("review");
                     setItems([{name:"",category:"Menu",price:"",vegetarian:null,variants:[]}]);
                     setPhoto(uri); setName("My restaurant menu"); setCurrency("UNKNOWN");
                     setSource("MANUAL REVIEW"); setMessage("Keep this menu alongside your draft. Enter the dishes below and attach individual photos if you have them."); return;
                 }
-                const draft = match?.draft ?? (publicDemo ? await scanWithReviewerKey(uri,liveKey.trim()) : (await request<{scanMenu: Draft}>(baseURL, token,
-                    `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu);
+                const draft = match?.draft ?? (await request<{scanMenu: Draft}>(baseURL, token,
+                    `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu;
                 setCurrency(draft.currency);
                 setName(match?.title ?? "My restaurant menu");
                 setScreen("review"); setItems(editDraft(draft));
@@ -350,17 +347,14 @@ export default function App() {
 						autoCapitalize="none"
 					/>
 				</View>}
-				{publicDemo && <View style={{gap:8}}>
-                    <Button secondary disabled={busy} title={showKey?"Close AI scan settings":"Set up live AI scanning"} onPress={()=>{setShowKey(!showKey);setLiveKey("")}} />
-                    {showKey && <><Text style={styles.small}>For a new photo, your browser sends the image directly to OpenRouter using your credits. Gemini 2.5 Flash-Lite reads the menu. Your key stays in memory.</Text><TextInput accessibilityLabel="OpenRouter API key" style={styles.input} value={liveKey} editable={!busy} secureTextEntry autoCapitalize="none" onChangeText={setLiveKey} placeholder="OpenRouter API key" /></>}
-                </View>}
-                <View style={styles.actions}>
+				<View style={styles.actions}>
                     <Button title="Upload menu photo" onPress={selectPhoto} disabled={busy || (!publicDemo && !token)} />
                     <Button secondary title="Try recorded demo" onPress={demo} disabled={busy || (!publicDemo && !token)} />
                     {publicDemo && <Button secondary title="Review illustrated menu" onPress={illustratedDemo} disabled={busy} />}
                     <Button secondary title="View saved menus" disabled={busy || (!publicDemo && !token)} onPress={()=>void action(async()=>{await refresh();setScreen("saved")})} />
                 </View>
-                <Text style={styles.small}>{publicDemo?"Try a sample without a key. For your own photo, enable live AI scanning or enter dishes manually. Saved menus stay in this browser.":"Photo extraction uses the configured AI provider. Reviewed menus are saved to the restaurant database."}</Text>
+                <Text style={styles.small}>{publicDemo?"Choose a sample to review an import, or upload your own photo for manual entry. Saved menus stay in this browser.":"Photo extraction uses the configured AI provider. Reviewed menus are saved to the restaurant database."}</Text>
+                {publicDemo && Platform.OS==="web" && <Text style={styles.small}><a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Run live AI scanning with your own server</a></Text>}
                 </>}
                 {busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
