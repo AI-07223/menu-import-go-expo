@@ -1,0 +1,47 @@
+{
+  "currency": "USD",
+  "items": [
+    {
+      "category": "FROM THE GRILL",
+      "name": "Charred corn",
+      "priceMinor": 650,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "FROM THE GRILL",
+      "name": "Pepper melt",
+      "priceMinor": 890,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "FROM THE GRILL",
+      "name": "Lime chicken",
+      "priceMinor": 1200,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "COLD DRINKS",
+      "name": "Ginger soda",
+      "priceMinor": 350,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "COLD DRINKS",
+      "name": "Cherry fizz",
+      "priceMinor": 400,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "COLD DRINKS",
+      "name": "Cold brew",
+      "priceMinor": 480,
+      "vegetarian": null,
+      "variants": []
+    }
+  ]
+}

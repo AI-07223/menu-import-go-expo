@@ -23,6 +23,7 @@ import {
 	reviewedItems,
 } from "./src/menu";
 
+import citrus from "./src/citrus.json";
 import recorded from "./src/recorded.json";
 const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
 const storageKey = "menu-review.saved.v1";
@@ -70,7 +71,7 @@ function PriceControl({label, value, onChange, busy}: {
         const next = (amount ?? 0) + delta;
         const disabled = busy || next <= 0 || next > 9999999 || (amount === null && value.trim() !== "");
         const direction = delta > 0 ? "increase" : "decrease";
-        const units = Math.abs(delta) === 100 ? "one rupee" : "ten rupees";
+        const units = Math.abs(delta) === 100 ? "one" : "ten";
         return (
             <Pressable accessibilityRole="button" accessibilityLabel={label + ", " + direction + " by " + units}
                 disabled={disabled} onPress={() => onChange(priceText(next))}
@@ -98,6 +99,8 @@ export default function App() {
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
+	const illustrated = source === "ILLUSTRATED MENU · AUTHORED ANSWER KEY";
+	const currency = illustrated ? "USD" : "INR";
 	const [softPhoto, setSoftPhoto] = useState(false);
 	const [photo, setPhoto] = useState<string | null>(null);
 	const lock = useRef(false);
@@ -131,6 +134,14 @@ export default function App() {
 		);
 		setSaved(data.menus);
 	}
+	function illustratedDemo() {
+        setItems(editDraft(citrus));
+        setName("Citrus Window");
+        setPhoto(null);
+        setSource("ILLUSTRATED MENU · AUTHORED ANSWER KEY");
+        setError("");
+        setMessage("Compare the six printed items with the answer key. The poster does not specify dietary labels.");
+    }
 	function demo() {
 		void action(async () => {
 			const data = publicDemo ? { demoDraft: recorded } : await request<{ demoDraft: Draft }>(
@@ -138,7 +149,8 @@ export default function App() {
 				token,
 				`query { demoDraft { ${fields} } }`,
 			);
-			setItems(editDraft(data.demoDraft));
+			setName("My restaurant menu");
+            setItems(editDraft(data.demoDraft));
 			setPhoto(null);
 			setSource("RECORDED DEMO · NO AI CALL");
 			setMessage(
@@ -185,7 +197,7 @@ export default function App() {
 					"Resolve every highlighted dish and enter a menu name before saving.",
 				);
 			if (publicDemo) {
-                const menu = { id: crypto.randomUUID(), name: name.trim(), currency: "INR", items: reviewedItems(items) };
+                const menu = { id: crypto.randomUUID(), name: name.trim(), currency, items: reviewedItems(items) };
                 const recent = [menu, ...browserMenus()].slice(0, 10);
                 localStorage.setItem(storageKey, JSON.stringify(recent));
                 setSaved(recent);
@@ -254,6 +266,7 @@ export default function App() {
 					/>
 				</View>}
 				<View style={styles.actions}>
+                    {publicDemo && <Button title="Try illustrated menu" onPress={illustratedDemo} disabled={busy} />} 
 					<Button
 						title="Try recorded demo"
 						onPress={demo}
@@ -300,10 +313,11 @@ export default function App() {
 							</Text>
 						</View>
 						<Text style={styles.small}>
-							All prices are INR. Unknown dietary labels and invalid prices must
+							All prices are {currency}. Unknown dietary labels and invalid prices must
 							be resolved. Review model-provided labels too.
 						</Text>
-						{!photo && source.startsWith("RECORDED") && <View style={{marginTop: 16}}>
+						{illustrated && <Image accessibilityLabel="Citrus Window illustrated menu and prices in USD" source={require("./assets/citrus-window.png")} resizeMode="contain" style={{width:"100%",height:520,marginVertical:12}} />}
+                        {!photo && source.startsWith("RECORDED") && <View style={{marginTop: 16}}>
                             <Text style={styles.label}>Sample menu photo · {softPhoto ? "soft focus" : "clear print"}</Text>
                             <Image accessibilityLabel="Simulated restaurant menu with six dishes and printed prices" source={softPhoto ? require("./assets/sample-blurred.png") : require("./assets/sample-clear.png")} resizeMode="contain" style={{width:"100%",height:250,backgroundColor:"#eee9de",borderRadius:10}} />
                             <Button secondary disabled={busy} title={softPhoto ? "View clear photo" : "View soft-focus photo"} onPress={() => setSoftPhoto(!softPhoto)} />
@@ -374,10 +388,10 @@ export default function App() {
 										/>
 									</View>
 									<View style={{minWidth: 170, flexGrow: 1}}>
-										<Text style={styles.label}>Price · INR</Text>
+										<Text style={styles.label}>Price · {currency}</Text>
 										<PriceControl
 											busy={busy}
-											label={`Dish ${index + 1} price in rupees`}
+											label={`Dish ${index + 1} price in ${currency}`}
 											value={item.price}
 											onChange={(price) => change(index, { price })}
 										/>
@@ -443,7 +457,7 @@ export default function App() {
 											/>
 										</View>
 										<View style={styles.field}>
-											<Text style={styles.label}>Portion price · INR</Text>
+											<Text style={styles.label}>Portion price · {currency}</Text>
 											<PriceControl
 												busy={busy}
 												label={`Dish ${index + 1} portion ${vi + 1} price`}
@@ -492,12 +506,12 @@ export default function App() {
 											</Text>
 											{item.variants.map((v, j) => (
 												<Text key={j} style={styles.small}>
-													{v.name} · INR {priceText(v.priceMinor)}
+													{v.name} · {entry.currency} {priceText(v.priceMinor)}
 												</Text>
 											))}
 										</View>
 										<Text style={styles.dishName}>
-											INR {priceText(item.priceMinor)}
+											{entry.currency} {priceText(item.priceMinor)}
 										</Text>
 									</View>
 								))}
