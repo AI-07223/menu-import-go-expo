@@ -54,3 +54,19 @@ func TestSaveValidationRejectsUnresolvedAndInvalidVariants(t *testing.T) {
 		t.Fatal("unpriced portion saved")
 	}
 }
+
+func TestConfidenceDoesNotDiscardDish(t *testing.T) {
+	for _, tc := range []struct {
+		raw  string
+		want int32
+	}{{"0", 0}, {"99", 99}, {"101", -1}, {"-1", -1}, {"null", -1}, {"0.8", -1}} {
+		draft, err := Normalize(`{"categories":[{"name":"Food","items":[{"name":"Rice","price":5,"confidence":` + tc.raw + `}]}]}`)
+		if err != nil || len(draft.Items) != 1 {
+			t.Fatal("lost dish", err)
+		}
+		got := draft.Items[0].Confidence
+		if (tc.want < 0 && got != nil) || (tc.want >= 0 && (got == nil || *got != tc.want)) {
+			t.Errorf("unexpected confidence for %s", tc.raw)
+		}
+	}
+}

@@ -127,7 +127,7 @@ export default function App() {
 	}
 	function change(index: number, update: Partial<EditableItem>) {
 		setItems((current) =>
-			current.map((item, i) => (i === index ? { ...item, ...update } : item)),
+			current.map((item, i) => (i === index ? { ...item, verified:false, ...update } : item)),
 		);
 	}
 	async function refresh() {
@@ -377,7 +377,7 @@ export default function App() {
 						</View>
 						<Text style={styles.small}>
 							All prices are {currency}. Unknown dietary labels and invalid prices must
-							be resolved. Review model-provided labels too.
+							be resolved. Color shows review priority. AI percentages are estimates, not measured accuracy. Compare the original photo for missing dishes.
 						</Text>
 						{illustrated && <Image accessibilityLabel="Citrus Window illustrated menu and prices in USD" source={require("./assets/citrus-window.png")} resizeMode="contain" style={{width:"100%",height:520,marginVertical:12}} />}
                         {!photo && source.startsWith("RECORDED") && <View style={{marginTop: 16}}>
@@ -403,12 +403,17 @@ export default function App() {
 							onChangeText={setName}
 							maxLength={120}
 						/>
-						{items.map((item, index) => (
+						{items.map((item, index) => {
+                            const incomplete = issues([item]) > 0;
+                            const score = item.confidence;
+                            const hue = incomplete ? 8 : item.verified ? 135 : score == null ? 40 : Math.round(10 + score * 0.78);
+                            const label = incomplete ? "Needs correction" : item.verified ? "Verified by you" : score == null ? "Ready to review" : score < 75 ? "Check against the photo" : "Review optional";
+                            return (
 							<View
 								key={index}
 								style={[
 									styles.card,
-									issues([item]) > 0 && styles.needsAttention,
+									{backgroundColor:`hsl(${hue}, 68%, 97%)`,borderLeftWidth:5,borderLeftColor:`hsl(${hue}, 55%, 39%)`},
 								]}
 							>
 								<View style={{flexDirection:"row",alignItems:"center",gap:14,marginBottom:12}}>
@@ -416,6 +421,8 @@ export default function App() {
                                     <View style={{flex:1}}><Text style={styles.menuName}>{item.name || "New dish"}</Text>
                                     <Text style={styles.small}>{item.photo ? "Your dish photo" : artwork(item) ? "Catalog illustration" : "Photo optional"}</Text></View>
                                 </View>
+                                <Text style={styles.label}>{label}{score != null ? ` · AI estimate for original scan: ${score}%` : ""}</Text>
+                                {!incomplete && !item.verified && <Button secondary title="Mark as verified" disabled={busy} onPress={()=>change(index,{verified:true})} />}
                                 <Button secondary disabled={busy} title={item.photo ? "Replace dish photo" : "Add dish photo"} onPress={() => attachPhoto(index)} />
                                 <View style={styles.headingRow}>
 									<Text style={styles.small}>
@@ -549,7 +556,7 @@ export default function App() {
 									</View>
 								))}
 							</View>
-						))}
+						);})}
 						<Button secondary disabled={busy} title="Add another dish" onPress={addDish} />
                         <Button
 							title={`Save ${items.length} reviewed dishes`}

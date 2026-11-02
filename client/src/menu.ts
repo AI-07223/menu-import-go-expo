@@ -1,5 +1,6 @@
 export type Variant = { name: string; priceMinor: number | null };
 export type Item = {
+ confidence?: number | null;
  photo?: string | null;
 	category: string;
 	name: string;
@@ -10,7 +11,8 @@ export type Item = {
 export type Draft = { currency: string; items: Item[] };
 export type SavedMenu = Draft & { id: string; name: string };
 export type EditableItem = Omit<Item, "priceMinor" | "variants"> & {
-	price: string;
+	verified?: boolean;
+ price: string;
 	variants: { name: string; price: string }[];
 };
 
@@ -36,8 +38,8 @@ export function editDraft(draft: Draft): EditableItem[] {
 	}));
 }
 export function reviewedItems(items: EditableItem[]): Item[] {
-	return items.map(({ price, variants, ...item }) => ({
-		...item,
+	return items.map(({ price, variants, name, category, vegetarian, photo }) => ({
+        name, category, vegetarian, photo,
 		priceMinor: parsePrice(price),
 		variants: variants.map((v) => ({
 			name: v.name,

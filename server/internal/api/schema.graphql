@@ -2,7 +2,7 @@ schema { query: Query, mutation: Mutation }
 type Query { demoDraft: Draft!, menus: [SavedMenu!]! }
 type Mutation { scanMenu(image: String!): Draft!, saveMenu(input: ReviewedMenuInput!): SavedMenu! }
 type Draft { currency: String!, items: [Item!]! }
-type Item { category: String!, name: String!, priceMinor: Int, vegetarian: Boolean, photo: String, variants: [Variant!]! }
+type Item { confidence: Int, category: String!, name: String!, priceMinor: Int, vegetarian: Boolean, photo: String, variants: [Variant!]! }
 type Variant { name: String!, priceMinor: Int }
 type SavedMenu { id: ID!, name: String!, currency: String!, items: [Item!]! }
 input VariantInput { name: String!, priceMinor: Int }

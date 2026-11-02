@@ -11,6 +11,7 @@ type Variant struct {
 	PriceMinor *int32 `json:"priceMinor"`
 }
 type Item struct {
+	Confidence *int32    `json:"confidence,omitempty"`
 	Photo      *string   `json:"photo,omitempty"`
 	Category   string    `json:"category"`
 	Name       string    `json:"name"`

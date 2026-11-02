@@ -15,6 +15,7 @@ type rawVariant struct {
 	Price json.RawMessage `json:"price"`
 }
 type rawItem struct {
+	Confidence json.RawMessage `json:"confidence"`
 	Name       *string         `json:"name"`
 	Price      json.RawMessage `json:"price"`
 	Vegetarian json.RawMessage `json:"is_veg"`
@@ -106,6 +107,10 @@ func Normalize(text string) (Draft, error) {
 				return result, errors.New("invalid model dish")
 			}
 			item := Item{Category: group, Name: strings.TrimSpace(*raw.Name), PriceMinor: ParseMinor(raw.Price), Vegetarian: dietary(raw.Vegetarian), Variants: []Variant{}}
+			var estimate *int32
+			if json.Unmarshal(raw.Confidence, &estimate) == nil && estimate != nil && *estimate >= 0 && *estimate <= 100 {
+				item.Confidence = estimate
+			}
 			for _, v := range raw.Variations {
 				if v.Name == nil || strings.TrimSpace(*v.Name) == "" || len(*v.Name) > 120 {
 					return result, errors.New("invalid model portion")
