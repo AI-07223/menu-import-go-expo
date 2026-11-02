@@ -22,6 +22,13 @@ import {
 	reviewedItems,
 } from "./src/menu";
 
+import recorded from "./src/recorded.json";
+const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
+const storageKey = "menu-review.saved.v1";
+function browserMenus(): SavedMenu[] {
+	return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+}
+
 const baseURL =
 	process.env.EXPO_PUBLIC_API_URL ??
 	(Platform.OS === "web" ? "" : "http://localhost:8780");
@@ -87,6 +94,7 @@ export default function App() {
 		);
 	}
 	async function refresh() {
+		if (publicDemo) { setSaved(browserMenus()); return; }
 		const data = await request<{ menus: SavedMenu[] }>(
 			baseURL,
 			token,
@@ -96,7 +104,7 @@ export default function App() {
 	}
 	function demo() {
 		void action(async () => {
-			const data = await request<{ demoDraft: Draft }>(
+			const data = publicDemo ? { demoDraft: recorded } : await request<{ demoDraft: Draft }>(
 				baseURL,
 				token,
 				`query { demoDraft { ${fields} } }`,
@@ -147,7 +155,16 @@ export default function App() {
 				throw new Error(
 					"Resolve every highlighted dish and enter a menu name before saving.",
 				);
-			const data = await request<{ saveMenu: SavedMenu }>(
+			if (publicDemo) {
+                const menu = { id: crypto.randomUUID(), name: name.trim(), currency: "INR", items: reviewedItems(items) };
+                const recent = [menu, ...browserMenus()].slice(0, 10);
+                localStorage.setItem(storageKey, JSON.stringify(recent));
+                setSaved(recent);
+                setItems([]);
+                setMessage("Saved in this browser. Reload saved menus to see it again.");
+                return;
+            }
+            const data = await request<{ saveMenu: SavedMenu }>(
 				baseURL,
 				token,
 				`mutation Save($input: ReviewedMenuInput!) { saveMenu(input: $input) { id name ${fields} } }`,
@@ -189,7 +206,7 @@ export default function App() {
 						knows the menu.
 					</Text>
 				</View>
-				<View style={styles.access}>
+				{!publicDemo && <View style={styles.access}>
 					<View style={{ flex: 1, minWidth: 180 }}>
 						<Text style={styles.label}>Operator token</Text>
 						<Text style={styles.small}>
@@ -206,30 +223,29 @@ export default function App() {
 						placeholder="Enter your operator token"
 						autoCapitalize="none"
 					/>
-				</View>
+				</View>}
 				<View style={styles.actions}>
 					<Button
 						title="Try recorded demo"
 						onPress={demo}
-						disabled={busy || !token}
+						disabled={busy || (!publicDemo && !token)}
 					/>
-					<Button
+					{!publicDemo && <Button
 						title="Extract from photo"
 						onPress={scan}
-						disabled={busy || !token}
-						secondary
-					/>
+                        disabled={busy || (!publicDemo && !token)}
+                        secondary
+                    />}
 					<Button
 						title="Reload saved menus"
 						onPress={() => void action(refresh)}
-						disabled={busy || !token}
+						disabled={busy || (!publicDemo && !token)}
 						secondary
 					/>
 				</View>
 				<Text style={styles.small}>
-					Demo uses a recorded synthetic extraction. Photo extraction sends your
-					image to configured AI providers; it requires a server-side API key.
-				</Text>
+					{publicDemo ? "Try the recorded menu, edit a dish, and save. Your last ten menus stay in this browser. No photo upload or live AI call." : "Demo uses a recorded synthetic extraction. Photo extraction sends your image to configured AI providers; it requires a server-side API key."}
+                </Text>
 				{busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
 						Working…

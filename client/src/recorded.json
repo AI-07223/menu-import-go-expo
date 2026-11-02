@@ -1,0 +1,47 @@
+{
+  "currency": "INR",
+  "items": [
+    {
+      "category": "Menu",
+      "name": "Paneer Tikka",
+      "priceMinor": 25000,
+      "vegetarian": true,
+      "variants": []
+    },
+    {
+      "category": "Menu",
+      "name": "Chicken Tikka",
+      "priceMinor": 32000,
+      "vegetarian": false,
+      "variants": []
+    },
+    {
+      "category": "Menu",
+      "name": "Dal Tadka",
+      "priceMinor": 18000,
+      "vegetarian": true,
+      "variants": []
+    },
+    {
+      "category": "Menu",
+      "name": "Butter Naan",
+      "priceMinor": 4500,
+      "vegetarian": true,
+      "variants": []
+    },
+    {
+      "category": "Menu",
+      "name": "Jeera Rice",
+      "priceMinor": 14000,
+      "vegetarian": true,
+      "variants": []
+    },
+    {
+      "category": "Menu",
+      "name": "Mango Lassi",
+      "priceMinor": 9000,
+      "vegetarian": true,
+      "variants": []
+    }
+  ]
+}

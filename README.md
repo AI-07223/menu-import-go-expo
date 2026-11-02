@@ -4,6 +4,8 @@ A focused reimplementation of a restaurant menu-import workflow in the technolog
 
 **Photo → untrusted draft → owner review → atomic PostgreSQL save.** The sample includes a clearly labelled recorded demo so it can be reviewed without a paid AI key.
 
+[Try the hosted menu review demo](https://menu-review.smartmade.site/). Load the recorded menu, edit a dish, and save in your browser. The Docker version below adds live photo extraction and PostgreSQL persistence.
+
 ## Run the complete application
 
 Requires Docker with Compose. No host Go or Node installation is needed.
