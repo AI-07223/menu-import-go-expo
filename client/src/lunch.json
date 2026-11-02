@@ -1,0 +1,159 @@
+{
+  "currency": "USD",
+  "items": [
+    {
+      "category": "Kitchen",
+      "name": "Grilled Chicken Caesar Salad",
+      "priceMinor": 1299,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Classic Club Sandwich",
+      "priceMinor": 1099,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Spinach and Feta Stuffed Chicken",
+      "priceMinor": 1499,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Vegetable Quinoa Bowl",
+      "priceMinor": 1199,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "BBQ Pulled Pork Sandwich",
+      "priceMinor": 999,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Caprese Panini",
+      "priceMinor": 899,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Fish Tacos",
+      "priceMinor": 1399,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Mushroom and Swiss Burger",
+      "priceMinor": 1299,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Quiche Lorraine",
+      "priceMinor": 1099,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Mediterranean Pasta",
+      "priceMinor": 1399,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Asian Chicken Salad",
+      "priceMinor": 1199,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Beef Stir-Fry",
+      "priceMinor": 1599,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Margherita Pizza",
+      "priceMinor": 1499,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Roasted Vegetable Wrap",
+      "priceMinor": 999,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Kitchen",
+      "name": "Soup of the Day",
+      "priceMinor": 599,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Soft Drinks",
+      "priceMinor": 299,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Iced Tea",
+      "priceMinor": 299,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Freshly Squeezed Lemonade",
+      "priceMinor": 399,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Fruit Smoothies",
+      "priceMinor": 499,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Coffee",
+      "priceMinor": 299,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Hot Tea",
+      "priceMinor": 299,
+      "vegetarian": null,
+      "variants": []
+    },
+    {
+      "category": "Beverages",
+      "name": "Bottled Water",
+      "priceMinor": 199,
+      "vegetarian": null,
+      "variants": []
+    }
+  ]
+}

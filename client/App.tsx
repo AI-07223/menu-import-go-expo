@@ -27,8 +27,14 @@ import house from "./public/kitchen/catalog.json";
 import catalog from "./src/catalog.json";
 import { closestDish } from "./src/matching";
 import citrus from "./src/citrus.json";
+import lunch from "./src/lunch.json";
 import recorded from "./src/recorded.json";
 const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
+const examples = [
+    {name:"Classic Indian menu", image:require("./assets/sample-clear.png"), draft:recorded, info:"Recorded Mistral scan · pixtral-12b-2409"},
+    {name:"Citrus Window · illustrated menu", image:require("./assets/citrus-window.png"), draft:citrus, info:"Illustrated reference · prepared transcription"},
+    {name:"Café Lunch Edition · two-column menu", image:require("./assets/lunch-edition.jpg"), draft:lunch, info:"Recreated restaurant menu · prepared transcription"},
+];
 const storageKey = "menu-review.saved.v1";
 function browserMenus(): SavedMenu[] {
 	return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
@@ -54,7 +60,8 @@ function Button({
 			accessibilityLabel={title}
 			disabled={disabled}
 			onPress={onPress}
-			style={[
+			style={({pressed})=>[
+                pressed && {opacity:0.7,transform:[{scale:0.97}]},
 				styles.button,
 				secondary && styles.secondary,
 				disabled && { opacity: 0.45 },
@@ -103,10 +110,12 @@ export default function App() {
 	const [screen,setScreen]=useState<"upload"|"review"|"saved">("upload");
     const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
-	const illustrated = source === "ILLUSTRATED MENU · AUTHORED ANSWER KEY";
+	const [sample,setSample]=useState(0);
+    const [setup,setSetup]=useState(false);
+    const isSample=source==="SAMPLE MENU";
 	const [currency, setCurrency] = useState("INR");
     const catalogDishes = house;
-	const [softPhoto, setSoftPhoto] = useState(false);
+	
 	const [photo, setPhoto] = useState<string | null>(null);
 	const lock = useRef(false);
 	const invalid = issues(items);
@@ -139,33 +148,12 @@ export default function App() {
 		);
 		setSaved(data.menus);
 	}
-	function illustratedDemo() {
-        setCurrency("USD");
-        setScreen("review"); setItems(editDraft(citrus));
-        setName("Citrus Window");
-        setPhoto(null);
-        setSource("ILLUSTRATED MENU · AUTHORED ANSWER KEY");
-        setError("");
-        setMessage("Compare the six printed items with the answer key. The poster does not specify dietary labels.");
+	function openExample(index:number) {
+        const example=examples[index];
+        setSample(index);setCurrency(example.draft.currency);setItems(editDraft(example.draft));
+        setName(example.name);setPhoto(null);setSource("SAMPLE MENU");setScreen("review");setError("");setMessage("");
     }
-	function demo() {
-		void action(async () => {
-			const data = publicDemo ? { demoDraft: recorded } : await request<{ demoDraft: Draft }>(
-				baseURL,
-				token,
-				`query { demoDraft { ${fields} } }`,
-			);
-			setCurrency(data.demoDraft.currency);
-            setName("My restaurant menu");
-            setScreen("review"); setItems(editDraft(data.demoDraft));
-			setPhoto(null);
-			setSource("RECORDED DEMO · NO AI CALL");
-			setMessage(
-				"Loaded a recorded synthetic menu. Check the draft before saving.",
-			);
-		});
-	}
-	function artwork(item: {name:string; photo?:string|null}) {
+    function artwork(item: {name:string; photo?:string|null}) {
         if (item.photo) return item.photo;
         const normalize = (name:string) => name.trim().toLowerCase().replace(/\s+/g, " ");
         return house.find(row => normalize(row.name) === normalize(item.name))?.image;
@@ -276,7 +264,7 @@ export default function App() {
 				);
 			if (publicDemo) {
                 const menu = { id: crypto.randomUUID(), name: name.trim(), currency, items: reviewedItems(items) };
-                const recent = [menu, ...browserMenus()].slice(0, 10);
+                const recent = [menu, ...browserMenus()];
                 localStorage.setItem(storageKey, JSON.stringify(recent));
                 setSaved(recent);
                 setItems([]); setSource(""); setScreen("saved");
@@ -347,14 +335,23 @@ export default function App() {
 						autoCapitalize="none"
 					/>
 				</View>}
-				<View style={styles.actions}>
-                    <Button title="Upload menu photo" onPress={selectPhoto} disabled={busy || (!publicDemo && !token)} />
-                    <Button secondary title="Try recorded demo" onPress={demo} disabled={busy || (!publicDemo && !token)} />
-                    {publicDemo && <Button secondary title="Review illustrated menu" onPress={illustratedDemo} disabled={busy} />}
-                    <Button secondary title="View saved menus" disabled={busy || (!publicDemo && !token)} onPress={()=>void action(async()=>{await refresh();setScreen("saved")})} />
+				<View style={{padding:22,backgroundColor:"#fff0de",borderRadius:16,gap:9,marginBottom:18}}>
+                    <Text style={styles.eyebrow}>01 / LIVE IMPORT</Text><Text style={styles.heading}>Use your own API</Text>
+                    <Text style={styles.small}>Connect a provider on your server and scan your restaurant’s menu.</Text>
+                    <Button title={publicDemo ? (setup?"Hide setup":"Set up my API") : "Upload menu photo"} disabled={busy||(!publicDemo&&!token)} onPress={publicDemo?()=>setSetup(!setup):selectPhoto}/>
+                    {setup && <Text style={styles.small}>Copy .env.example to .env, set OPENROUTER_API_KEY, and start the app with Docker. {Platform.OS==="web" && <a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Open setup guide ↗</a>}</Text>}
                 </View>
-                <Text style={styles.small}>{publicDemo?"Choose a sample to review an import, or upload your own photo for manual entry. Saved menus stay in this browser.":"Photo extraction uses the configured AI provider. Reviewed menus are saved to the restaurant database."}</Text>
-                {publicDemo && Platform.OS==="web" && <Text style={styles.small}><a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Run live AI scanning with your own server</a></Text>}
+                <View style={{marginBottom:22,gap:9}}>
+                    <Image source={require("./assets/citrus-window.png")} accessibilityLabel="Illustrated Citrus Window menu" resizeMode="cover" style={{height:160,borderRadius:14,width:"100%"}}/>
+                    <Text style={styles.eyebrow}>02 / EXPLORE</Text><Text style={styles.heading}>Recorded demos</Text>
+                    <Text style={styles.small}>Choose a menu photo, compare its transcription and edit the dishes.</Text>
+                    <Button title="Open menu demos" disabled={busy} onPress={()=>openExample(0)}/>
+                </View>
+                <View style={{borderTopWidth:1,borderColor:"#dfd8d0",paddingVertical:18,gap:8}}>
+                    <Text style={styles.eyebrow}>03 / YOUR COLLECTION</Text><Text style={styles.heading}>Saved menus</Text>
+                    <Text style={styles.small}>{publicDemo?"Menus you save in this browser appear here.":"See the menus saved to your restaurant."}</Text>
+                    <Button secondary title="View saved menus" disabled={busy||(!publicDemo&&!token)} onPress={()=>void action(async()=>{await refresh();setScreen("saved")})}/>
+                </View>
                 </>}
                 {busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
@@ -368,7 +365,11 @@ export default function App() {
 				)}
 				{screen==="review" && (
 					<View style={styles.section}>
-						<Text style={styles.eyebrow}>{source}</Text>
+						{isSample ? <View style={{gap:8,marginBottom:18}}>
+                            <Text style={styles.eyebrow}>MENU DEMOS</Text><Text style={styles.label}>{examples[sample].info}</Text>
+                            <Image accessibilityLabel={examples[sample].name} source={examples[sample].image} resizeMode="contain" style={{width:"100%",height:360,backgroundColor:"#f5efe6",borderRadius:12}}/>
+                            {Platform.OS==="web"?<select aria-label="Choose menu photo" value={sample} disabled={busy} onChange={e=>openExample(Number(e.target.value))} style={{width:"100%",padding:14,fontSize:16,fontWeight:600,borderRadius:8,border:"1px solid #bfb5aa",background:"white"}}>{examples.map((x,i)=><option key={x.name} value={i}>{x.name}</option>)}</select>:examples.map((x,i)=><Button key={x.name} secondary={sample!==i} title={x.name} onPress={()=>openExample(i)}/>)}
+                        </View>:<Text style={styles.eyebrow}>{source}</Text>}
 						<View style={styles.headingRow}>
 							<Text style={styles.heading}>Check the details.</Text>
 							<Text style={styles.badge}>
@@ -379,13 +380,7 @@ export default function App() {
 							All prices are {currency}. Unknown dietary labels and invalid prices must
 							be resolved. Color shows review priority. AI percentages are estimates, not measured accuracy. Compare the original photo for missing dishes.
 						</Text>
-						{illustrated && <Image accessibilityLabel="Citrus Window illustrated menu and prices in USD" source={require("./assets/citrus-window.png")} resizeMode="contain" style={{width:"100%",height:520,marginVertical:12}} />}
-                        {!photo && source.startsWith("RECORDED") && <View style={{marginTop: 16}}>
-                            <Text style={styles.label}>Sample menu photo · {softPhoto ? "soft focus" : "clear print"}</Text>
-                            <Image accessibilityLabel="Simulated restaurant menu with six dishes and printed prices" source={softPhoto ? require("./assets/sample-blurred.png") : require("./assets/sample-clear.png")} resizeMode="contain" style={{width:"100%",height:250,backgroundColor:"#eee9de",borderRadius:10}} />
-                            <Button secondary disabled={busy} title={softPhoto ? "View clear photo" : "View soft-focus photo"} onPress={() => setSoftPhoto(!softPhoto)} />
-                        </View>}
-                        {photo && (
+						{photo && (
 							<Image
 								accessibilityLabel="Uploaded menu reference"
 								source={{ uri: photo }}
@@ -559,7 +554,7 @@ export default function App() {
 						);})}
 						<Button secondary disabled={busy} title="Add another dish" onPress={addDish} />
                         <Button
-							title={`Save ${items.length} reviewed dishes`}
+							title={busy?"Saving…":"Save this menu"}
 							onPress={save}
 							disabled={busy}
 						/>
@@ -603,10 +598,7 @@ export default function App() {
 						))
 					)}
 				</View>}
-				<Text style={styles.footer}>
-					AI-assisted implementation · Human-reviewed data · No automatic
-					publishing
-				</Text>
+				
 			</ScrollView>
 		</>
 	);
