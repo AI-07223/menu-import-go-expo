@@ -68,13 +68,14 @@ func dietary(raw json.RawMessage) *bool {
 	return &value
 }
 func Normalize(text string) (Draft, error) {
-	result := Draft{Currency: "INR", Items: []Item{}}
+	result := Draft{Currency: "UNKNOWN", Items: []Item{}}
 	// Tolerate a single Markdown code fence, but not arbitrary surrounding text.
 	text = strings.TrimSpace(text)
 	if strings.HasPrefix(text, "```json") && strings.HasSuffix(text, "```") {
 		text = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(text, "```json"), "```"))
 	}
 	var response struct {
+		Currency   string         `json:"currency"`
 		Categories *[]rawCategory `json:"categories"`
 	}
 	decoder := json.NewDecoder(bytes.NewBufferString(text))
@@ -85,6 +86,9 @@ func Normalize(text string) (Draft, error) {
 	var extra any
 	if decoder.Decode(&extra) != io.EOF || response.Categories == nil || len(*response.Categories) > 100 {
 		return result, errors.New("invalid model categories")
+	}
+	if response.Currency == "INR" || response.Currency == "USD" {
+		result.Currency = response.Currency
 	}
 	for _, category := range *response.Categories {
 		if category.Name == nil || category.Items == nil || len(*category.Items) > 100 {

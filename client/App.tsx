@@ -23,6 +23,8 @@ import {
 	reviewedItems,
 } from "./src/menu";
 
+import catalog from "./src/catalog.json";
+import { closestDish } from "./src/matching";
 import citrus from "./src/citrus.json";
 import recorded from "./src/recorded.json";
 const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
@@ -100,7 +102,8 @@ export default function App() {
 	const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
 	const illustrated = source === "ILLUSTRATED MENU · AUTHORED ANSWER KEY";
-	const currency = illustrated ? "USD" : "INR";
+	const [currency, setCurrency] = useState("INR");
+    const catalogDishes = catalog.flatMap<{name: string; category: string}>(entry => entry.draft.items);
 	const [softPhoto, setSoftPhoto] = useState(false);
 	const [photo, setPhoto] = useState<string | null>(null);
 	const lock = useRef(false);
@@ -135,6 +138,7 @@ export default function App() {
 		setSaved(data.menus);
 	}
 	function illustratedDemo() {
+        setCurrency("USD");
         setItems(editDraft(citrus));
         setName("Citrus Window");
         setPhoto(null);
@@ -149,7 +153,8 @@ export default function App() {
 				token,
 				`query { demoDraft { ${fields} } }`,
 			);
-			setName("My restaurant menu");
+			setCurrency(data.demoDraft.currency);
+            setName("My restaurant menu");
             setItems(editDraft(data.demoDraft));
 			setPhoto(null);
 			setSource("RECORDED DEMO · NO AI CALL");
@@ -158,7 +163,40 @@ export default function App() {
 			);
 		});
 	}
-	function scan() {
+	function selectPhoto() {
+        if (Platform.OS !== "web") { scan(); return; }
+        const picker = document.createElement("input");
+        picker.type = "file";
+        picker.accept = "image/png,image/jpeg";
+        picker.onchange = () => {
+            const file = picker.files?.[0];
+            if (!file) return;
+            void action(async () => {
+                if (file.size > 4 * 1024 * 1024) throw new Error("Choose an image under 4 MiB.");
+                const bytes = await file.arrayBuffer();
+                const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+                const digest = Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
+                const match = catalog.find(entry => entry.images.some(image => image.sha256 === digest));
+                if (!match && publicDemo) throw new Error("No exact image match. Try a sample below. Live extraction for other images requires a configured server.");
+                const uri = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result));
+                    reader.onerror = () => reject(new Error("Could not read this image."));
+                    reader.readAsDataURL(file);
+                });
+                const draft = match?.draft ?? (await request<{scanMenu: Draft}>(baseURL, token,
+                    `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu;
+                setCurrency(draft.currency);
+                setName(match?.title ?? "My restaurant menu");
+                setItems(editDraft(draft));
+                setPhoto(uri);
+                setSource(match ? "EXACT IMAGE MATCH · CATALOG" : "LIVE EXTRACTION · REVIEW REQUIRED");
+                setMessage(match ? "This image matches the reference file exactly. Loaded its recorded prices." : "Check the extracted values against the photo.");
+            });
+        };
+        picker.click();
+    }
+    function scan() {
 		void action(async () => {
 			const result = await ImagePicker.launchImageLibraryAsync({
 				mediaTypes: ["images"],
@@ -180,7 +218,8 @@ export default function App() {
 				`mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`,
 				{ image: `data:${asset.mimeType};base64,${asset.base64}` },
 			);
-			setPhoto(asset.uri);
+			setCurrency(data.scanMenu.currency);
+            setPhoto(asset.uri);
 			setItems(editDraft(data.scanMenu));
 			setSource("LIVE EXTRACTION · REVIEW REQUIRED");
 			setMessage(
@@ -192,7 +231,8 @@ export default function App() {
 	}
 	function save() {
 		void action(async () => {
-			if (!items.length || invalid || !name.trim())
+			if (!["INR", "USD"].includes(currency)) throw new Error("Confirm the currency before saving.");
+            if (!items.length || invalid || !name.trim())
 				throw new Error(
 					"Resolve every highlighted dish and enter a menu name before saving.",
 				);
@@ -212,7 +252,7 @@ export default function App() {
 				{
 					input: {
 						name: name.trim(),
-						currency: "INR",
+						currency,
 						items: reviewedItems(items),
 					},
 				},
@@ -272,9 +312,9 @@ export default function App() {
 						onPress={demo}
 						disabled={busy || (!publicDemo && !token)}
 					/>
-					{!publicDemo && <Button
-						title="Extract from photo"
-						onPress={scan}
+					{<Button
+                        title={publicDemo ? "Match a menu photo" : "Import menu photo"}
+						onPress={selectPhoto}
                         disabled={busy || (!publicDemo && !token)}
                         secondary
                     />}
@@ -286,7 +326,7 @@ export default function App() {
 					/>
 				</View>
 				<Text style={styles.small}>
-					{publicDemo ? "Try the recorded menu, edit a dish, and save. Your last ten menus stay in this browser. No photo upload or live AI call." : "Demo uses a recorded synthetic extraction. Photo extraction sends your image to configured AI providers; it requires a server-side API key."}
+					{publicDemo ? "Try the recorded menu, edit a dish, and save. Your last ten menus stay in this browser. Photo matching runs in your browser." : "Demo uses a recorded synthetic extraction. Photo extraction sends your image to configured AI providers; it requires a server-side API key."}
                 </Text>
 				{busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
@@ -330,7 +370,8 @@ export default function App() {
 								style={{ height: 220, marginTop: 16 }}
 							/>
 						)}
-						<Text style={[styles.label, { marginTop: 20 }]}>Menu name</Text>
+						{currency === "UNKNOWN" && <View><Text style={styles.label}>Which currency is printed on this menu?</Text><Button title="Indian rupees (INR)" onPress={() => setCurrency("INR")} /><Button title="US dollars (USD)" onPress={() => setCurrency("USD")} /></View>}
+                        <Text style={[styles.label, { marginTop: 20 }]}>Menu name</Text>
 						<TextInput
 							editable={!busy}
 							accessibilityLabel="Menu name"
@@ -364,7 +405,12 @@ export default function App() {
 										<Text style={styles.remove}>Remove</Text>
 									</Pressable>
 								</View>
-								<View style={styles.fields}>
+								{(() => {
+                                    const candidate = closestDish(item.name, catalogDishes);
+                                    if (!candidate || (candidate.name === item.name && candidate.category === item.category)) return null;
+                                    return <Button secondary disabled={busy} title={`Use catalog match: ${candidate.name} · ${candidate.category}`} onPress={() => change(index, {name:candidate.name, category:candidate.category})} />;
+                                })()}
+                                <View style={styles.fields}>
 									<View style={styles.field}>
 										<Text style={styles.label}>Dish name</Text>
 										<TextInput

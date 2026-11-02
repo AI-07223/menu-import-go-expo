@@ -1,0 +1,118 @@
+[
+  {
+    "title": "Citrus Window",
+    "images": [
+      {
+        "file": "citrus-window.png",
+        "sha256": "101e793a18da3f8f88e4d2f9c31fc69d07943a9ec36b99b11da4f1d513ebdbcc"
+      }
+    ],
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "category": "FROM THE GRILL",
+          "name": "Charred corn",
+          "priceMinor": 650,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "category": "FROM THE GRILL",
+          "name": "Pepper melt",
+          "priceMinor": 890,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "category": "FROM THE GRILL",
+          "name": "Lime chicken",
+          "priceMinor": 1200,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "category": "COLD DRINKS",
+          "name": "Ginger soda",
+          "priceMinor": 350,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "category": "COLD DRINKS",
+          "name": "Cherry fizz",
+          "priceMinor": 400,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "category": "COLD DRINKS",
+          "name": "Cold brew",
+          "priceMinor": 480,
+          "vegetarian": null,
+          "variants": []
+        }
+      ]
+    }
+  },
+  {
+    "title": "Indian menu",
+    "images": [
+      {
+        "file": "sample-clear.png",
+        "sha256": "9844ac552af1ad2aee9e70e2089817754923664a56ef82d9a295f0f7cdfb4a2b"
+      },
+      {
+        "file": "sample-blurred.png",
+        "sha256": "8813f6eb09ed3c1191083301bec47d0bd1270c9c96d05839949eb14ce20875f3"
+      }
+    ],
+    "draft": {
+      "currency": "INR",
+      "items": [
+        {
+          "category": "Starters",
+          "name": "Paneer Tikka",
+          "priceMinor": 25000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Starters",
+          "name": "Chicken Tikka",
+          "priceMinor": 32000,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "category": "Mains",
+          "name": "Dal Tadka",
+          "priceMinor": 18000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Breads",
+          "name": "Butter Naan",
+          "priceMinor": 4500,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Rice",
+          "name": "Jeera Rice",
+          "priceMinor": 14000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Drinks",
+          "name": "Mango Lassi",
+          "priceMinor": 9000,
+          "vegetarian": true,
+          "variants": []
+        }
+      ]
+    }
+  }
+]

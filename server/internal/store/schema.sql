@@ -15,3 +15,10 @@ CREATE TABLE IF NOT EXISTS menu_items (
  PRIMARY KEY (menu_id, position),
  UNIQUE(menu_id, category, name)
 );
+
+DO $$ BEGIN
+ IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='menus'::regclass AND conname='menus_currency_check') THEN
+   ALTER TABLE menus DROP CONSTRAINT menus_currency_check;
+   ALTER TABLE menus ADD CONSTRAINT menus_supported_currency CHECK (currency IN ('INR','USD'));
+ END IF;
+END $$;

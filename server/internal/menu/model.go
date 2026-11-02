@@ -32,8 +32,8 @@ func Validate(name string, d Draft) error {
 	if strings.TrimSpace(name) == "" || len(name) > 120 {
 		return errors.New("menu name must contain 1–120 bytes")
 	}
-	if d.Currency != "INR" {
-		return errors.New("this sample supports INR only")
+	if d.Currency != "INR" && d.Currency != "USD" {
+		return errors.New("confirm INR or USD before saving")
 	}
 	if len(d.Items) == 0 || len(d.Items) > 100 {
 		return errors.New("review between 1 and 100 dishes")
