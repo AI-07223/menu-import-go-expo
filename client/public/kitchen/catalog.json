@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "name": "Charred corn",
+    "category": "Grill",
+    "price_minor": 650,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/charred-corn.jpg",
+    "sha256": "f0eba312c6a833d40ddf44670f1ea3304f5d5747232042f00a0c0705d839ffa2"
+  },
+  {
+    "id": 2,
+    "name": "Pepper melt",
+    "category": "Grill",
+    "price_minor": 890,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/pepper-melt.jpg",
+    "sha256": "d4ed68165b74fbf039c9359421a5e1173207dbdf6c59f61fbbfff8e73020b874"
+  },
+  {
+    "id": 3,
+    "name": "Lime chicken",
+    "category": "Grill",
+    "price_minor": 1200,
+    "currency": "USD",
+    "vegetarian": false,
+    "image": "/kitchen/lime-chicken.jpg",
+    "sha256": "0ced33366cb8d895aabdfd89eb43992cb799f8def66ddc3d8055efa79163ff2b"
+  },
+  {
+    "id": 4,
+    "name": "Ginger soda",
+    "category": "Drinks",
+    "price_minor": 350,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/ginger-soda.jpg",
+    "sha256": "7bec3a8c3c5b284958579abe2c7ea50ce794acd0f26b5231d9eab9eb7348d89c"
+  },
+  {
+    "id": 5,
+    "name": "Cherry fizz",
+    "category": "Drinks",
+    "price_minor": 400,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/cherry-fizz.jpg",
+    "sha256": "4a0d69649033211af102c592c9e46f143d231c1a484aa26a5f22016b3a951a19"
+  },
+  {
+    "id": 6,
+    "name": "Cold brew",
+    "category": "Drinks",
+    "price_minor": 480,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/cold-brew.jpg",
+    "sha256": "63a1813fc8dbc7af615338809411d3cf3b7b218d6003cab50c28f9e6706e9973"
+  },
+  {
+    "id": 7,
+    "name": "Margherita slice",
+    "category": "Pizza",
+    "price_minor": 550,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/margherita-slice.jpg",
+    "sha256": "a85aaf03f9f3a8d4314408b9dfd4c1a5f20db8cdcca5896effe3f1fcd0730006"
+  },
+  {
+    "id": 8,
+    "name": "French fries",
+    "category": "Sides",
+    "price_minor": 390,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/french-fries.jpg",
+    "sha256": "4556576b3f33e0b4ca070b76b5ec667d8c6078f1a1d841da7897543a149bd79c"
+  },
+  {
+    "id": 9,
+    "name": "Chocolate donut",
+    "category": "Bakery",
+    "price_minor": 325,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/chocolate-donut.jpg",
+    "sha256": "e985b9d5d7b5429086e7b6b6af6d960ba41b49a1f6ea86f1a3d428d4fc2325d6"
+  },
+  {
+    "id": 10,
+    "name": "Berry cheesecake",
+    "category": "Bakery",
+    "price_minor": 675,
+    "currency": "USD",
+    "vegetarian": true,
+    "image": "/kitchen/berry-cheesecake.jpg",
+    "sha256": "a6e87283e938f12497e868ae7f9d050892bf1c3c71f501138ab833035ffebc86"
+  }
+]
