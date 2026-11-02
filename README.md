@@ -4,7 +4,7 @@ A focused reimplementation of a restaurant menu-import workflow in the technolog
 
 **Photo → untrusted draft → owner review → atomic PostgreSQL save.** The sample includes a clearly labelled recorded demo so it can be reviewed without a paid AI key.
 
-[Try the hosted menu review demo](https://menu-review.smartmade.site/). Open the ten-item illustrated SQLite catalog, download a reference photo and upload it to match its exact bytes. New photos open an editable manual draft. Saved edits stay in IndexedDB. The Menu scanner link opens the earlier extraction examples. The Docker version below adds live photo extraction and PostgreSQL persistence.
+[Try the hosted menu review demo](https://menu-review.smartmade.site/). Review a scanned draft or upload a menu for manual review. The ten-item house catalog supplies illustrative photos for exact dish-name matches. Other dishes remain editable and can receive a custom photo during verification. The Docker version below adds live photo extraction and PostgreSQL persistence.
 
 ## Run the complete application
 

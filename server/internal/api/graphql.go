@@ -32,6 +32,7 @@ type variantInput struct {
 	PriceMinor *int32
 }
 type itemInput struct {
+	Photo          *string
 	Category, Name string
 	PriceMinor     *int32
 	Vegetarian     *bool
@@ -69,7 +70,7 @@ func (r *Resolver) Menus(ctx context.Context) ([]*savedResolver, error) {
 func (r *Resolver) SaveMenu(ctx context.Context, args struct{ Input reviewedInput }) (*savedResolver, error) {
 	d := menu.Draft{Currency: args.Input.Currency, Items: []menu.Item{}}
 	for _, v := range args.Input.Items {
-		item := menu.Item{Category: v.Category, Name: v.Name, PriceMinor: v.PriceMinor, Vegetarian: v.Vegetarian, Variants: []menu.Variant{}}
+		item := menu.Item{Photo: v.Photo, Category: v.Category, Name: v.Name, PriceMinor: v.PriceMinor, Vegetarian: v.Vegetarian, Variants: []menu.Variant{}}
 		for _, variant := range v.Variants {
 			item.Variants = append(item.Variants, menu.Variant{Name: variant.Name, PriceMinor: variant.PriceMinor})
 		}

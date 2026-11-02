@@ -23,6 +23,7 @@ import {
 	reviewedItems,
 } from "./src/menu";
 
+import house from "./public/kitchen/catalog.json";
 import catalog from "./src/catalog.json";
 import { closestDish } from "./src/matching";
 import citrus from "./src/citrus.json";
@@ -103,7 +104,7 @@ export default function App() {
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
 	const illustrated = source === "ILLUSTRATED MENU · AUTHORED ANSWER KEY";
 	const [currency, setCurrency] = useState("INR");
-    const catalogDishes = catalog.flatMap<{name: string; category: string}>(entry => entry.draft.items);
+    const catalogDishes = house;
 	const [softPhoto, setSoftPhoto] = useState(false);
 	const [photo, setPhoto] = useState<string | null>(null);
 	const lock = useRef(false);
@@ -163,7 +164,37 @@ export default function App() {
 			);
 		});
 	}
-	function selectPhoto() {
+	function artwork(item: {name:string; photo?:string|null}) {
+        if (item.photo) return item.photo;
+        const normalize = (name:string) => name.trim().toLowerCase().replace(/\s+/g, " ");
+        return house.find(row => normalize(row.name) === normalize(item.name))?.image;
+    }
+    function addDish() {
+        setItems(current => [...current, {name:"", category:"Menu", price:"", vegetarian:null, variants:[]}]);
+    }
+    function attachPhoto(index:number) {
+        void action(async () => {
+            const result = await ImagePicker.launchImageLibraryAsync({mediaTypes:["images"],base64:true,quality:0.55});
+            if (result.canceled) return;
+            const asset=result.assets[0];
+            if (!asset.base64) throw new Error("Could not read this photo.");
+            let uri = "data:" + (asset.mimeType ?? "image/jpeg") + ";base64," + asset.base64;
+            if (Platform.OS === "web") {
+                const image = document.createElement("img");
+                image.src=uri;
+                await image.decode();
+                const scale=Math.min(1,480/Math.max(image.width,image.height));
+                const canvas=document.createElement("canvas");
+                canvas.width=Math.max(1,Math.round(image.width*scale));
+                canvas.height=Math.max(1,Math.round(image.height*scale));
+                canvas.getContext("2d")!.drawImage(image,0,0,canvas.width,canvas.height);
+                uri=canvas.toDataURL("image/jpeg",0.78);
+            }
+            if (uri.length>350000 || !/^data:image\/(jpeg|png);base64,/.test(uri)) throw new Error("Choose a smaller PNG or JPEG.");
+            change(index,{photo:uri});
+        });
+    }
+    function selectPhoto() {
         if (Platform.OS !== "web") { scan(); return; }
         const picker = document.createElement("input");
         picker.type = "file";
@@ -177,13 +208,18 @@ export default function App() {
                 const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
                 const digest = Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
                 const match = catalog.find(entry => entry.images.some(image => image.sha256 === digest));
-                if (!match && publicDemo) throw new Error("No exact image match. Try a sample below. Live extraction for other images requires a configured server.");
+                
                 const uri = await new Promise<string>((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(String(reader.result));
                     reader.onerror = () => reject(new Error("Could not read this image."));
                     reader.readAsDataURL(file);
                 });
+                if (!match && publicDemo) {
+                    setItems([{name:"",category:"Menu",price:"",vegetarian:null,variants:[]}]);
+                    setPhoto(uri); setName("My restaurant menu"); setCurrency("UNKNOWN");
+                    setSource("MANUAL REVIEW"); setMessage("Keep this menu alongside your draft. Enter the dishes below and attach individual photos if you have them."); return;
+                }
                 const draft = match?.draft ?? (await request<{scanMenu: Draft}>(baseURL, token,
                     `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu;
                 setCurrency(draft.currency);
@@ -241,7 +277,7 @@ export default function App() {
                 const recent = [menu, ...browserMenus()].slice(0, 10);
                 localStorage.setItem(storageKey, JSON.stringify(recent));
                 setSaved(recent);
-                setItems([]);
+                setItems([]); setSource("");
                 setMessage("Saved in this browser. Reload saved menus to see it again.");
                 return;
             }
@@ -261,7 +297,7 @@ export default function App() {
 				data.saveMenu,
 				...current.filter((m) => m.id !== data.saveMenu.id),
 			]);
-			setItems([]);
+			setItems([]); setSource("");
 			setMessage(
 				`Saved ${data.saveMenu.items.length} dishes to PostgreSQL. Reload saved menus to verify persistence.`,
 			);
@@ -306,14 +342,14 @@ export default function App() {
 					/>
 				</View>}
 				<View style={styles.actions}>
-                    {publicDemo && <Button title="Try illustrated menu" onPress={illustratedDemo} disabled={busy} />} 
+                    {publicDemo && <Button title="Review illustrated menu" onPress={illustratedDemo} disabled={busy} />} 
 					<Button
 						title="Try recorded demo"
 						onPress={demo}
 						disabled={busy || (!publicDemo && !token)}
 					/>
 					{<Button
-                        title={publicDemo ? "Match a menu photo" : "Import menu photo"}
+                        title="Upload menu photo"
 						onPress={selectPhoto}
                         disabled={busy || (!publicDemo && !token)}
                         secondary
@@ -343,7 +379,7 @@ export default function App() {
 						{message}
 					</Text>
 				)}
-				{!!items.length && (
+				{(!!items.length || !!source) && (
 					<View style={styles.section}>
 						<Text style={styles.eyebrow}>{source}</Text>
 						<View style={styles.headingRow}>
@@ -388,7 +424,13 @@ export default function App() {
 									issues([item]) > 0 && styles.needsAttention,
 								]}
 							>
-								<View style={styles.headingRow}>
+								<View style={{flexDirection:"row",alignItems:"center",gap:14,marginBottom:12}}>
+                                    {artwork(item) && <Image source={{uri:artwork(item)}} accessibilityLabel={item.photo ? "Uploaded dish photo" : "Catalog illustration of "+item.name} resizeMode="cover" style={{width:100,height:76,borderRadius:10}} />}
+                                    <View style={{flex:1}}><Text style={styles.menuName}>{item.name || "New dish"}</Text>
+                                    <Text style={styles.small}>{item.photo ? "Your dish photo" : artwork(item) ? "Catalog illustration" : "Photo optional"}</Text></View>
+                                </View>
+                                <Button secondary disabled={busy} title={item.photo ? "Replace dish photo" : "Add dish photo"} onPress={() => attachPhoto(index)} />
+                                <View style={styles.headingRow}>
 									<Text style={styles.small}>
 										DISH {String(index + 1).padStart(2, "0")}
 									</Text>
@@ -521,7 +563,8 @@ export default function App() {
 								))}
 							</View>
 						))}
-						<Button
+						<Button secondary disabled={busy} title="Add another dish" onPress={addDish} />
+                        <Button
 							title={`Save ${items.length} reviewed dishes`}
 							onPress={save}
 							disabled={busy}
@@ -544,6 +587,7 @@ export default function App() {
 								</Text>
 								{entry.items.map((item, i) => (
 									<View key={i} style={styles.savedRow}>
+                                        {artwork(item) && <Image source={{uri:artwork(item)}} accessibilityLabel={"Photo for "+item.name} style={{width:72,height:56,borderRadius:8}} />}
 										<View style={{ flex: 1 }}>
 											<Text style={styles.dishName}>{item.name}</Text>
 											<Text style={styles.small}>

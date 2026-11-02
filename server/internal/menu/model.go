@@ -11,6 +11,7 @@ type Variant struct {
 	PriceMinor *int32 `json:"priceMinor"`
 }
 type Item struct {
+	Photo      *string   `json:"photo,omitempty"`
 	Category   string    `json:"category"`
 	Name       string    `json:"name"`
 	PriceMinor *int32    `json:"priceMinor"`
@@ -41,6 +42,9 @@ func Validate(name string, d Draft) error {
 	for i, item := range d.Items {
 		if strings.TrimSpace(item.Name) == "" || len(item.Name) > 255 || strings.TrimSpace(item.Category) == "" || len(item.Category) > 120 {
 			return fmt.Errorf("dish %d needs a valid name and category", i+1)
+		}
+		if item.Photo != nil && (len(*item.Photo) > 350000 || CheckImage(*item.Photo) != nil) {
+			return fmt.Errorf("invalid photo for dish %d", i+1)
 		}
 		if item.Vegetarian == nil {
 			return fmt.Errorf("choose a dietary classification for dish %d", i+1)

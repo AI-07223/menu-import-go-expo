@@ -1,5 +1,6 @@
 export type Variant = { name: string; priceMinor: number | null };
 export type Item = {
+ photo?: string | null;
 	category: string;
 	name: string;
 	priceMinor: number | null;

@@ -22,3 +22,5 @@ DO $$ BEGIN
    ALTER TABLE menus ADD CONSTRAINT menus_supported_currency CHECK (currency IN ('INR','USD'));
  END IF;
 END $$;
+
+ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS photo text;

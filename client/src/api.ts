@@ -1,5 +1,5 @@
 export const fields =
-	"currency items { category name priceMinor vegetarian variants { name priceMinor } }";
+	"currency items { category name priceMinor vegetarian photo variants { name priceMinor } }";
 export async function request<T>(
 	baseURL: string,
 	token: string,
