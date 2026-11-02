@@ -17,7 +17,7 @@ Open http://localhost:8780. Enter the local-only operator token `local-review-on
 ## Configure live scanning
 
 1. In the repository root, copy `.env.example` to `.env` (PowerShell: `Copy-Item .env.example .env`; macOS/Linux: `cp .env.example .env`). If you already have a .env file, edit it in place.
-2. Set `OPENROUTER_API_KEY` in that file. The default model is `google/gemini-2.5-flash-lite`. To change it, set `OPENROUTER_MODEL` to an image-capable model. Configure Mistral only if you want a second provider to receive the image when the first fails.
+2. Set `OPENROUTER_API_KEY` in that file. The default model is `google/gemini-2.5-flash-lite`. To change it, set `OPENROUTER_MODEL` to an image-capable model.
 3. Run `docker compose up -d --build app`. After changing only a key or model, run `docker compose up -d app` again so the container receives the new configuration.
 4. Open http://localhost:8780, enter the operator token from your local configuration, and choose **Upload menu photo**. Use a fresh PNG/JPEG to exercise live extraction. Known reference files take the local lookup path.
 

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
 	Platform,
 	Pressable,
@@ -31,10 +31,11 @@ import lunch from "./src/lunch.json";
 import recorded from "./src/recorded.json";
 const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
 const examples = [
-    {name:"Classic Indian menu", image:require("./assets/sample-clear.png"), draft:recorded, info:"Recorded Mistral scan · pixtral-12b-2409"},
+    {name:"Classic Indian menu", image:require("./assets/sample-clear.png"), draft:recorded, info:"Archived transcription · Gemini scan pending"},
     {name:"Citrus Window · illustrated menu", image:require("./assets/citrus-window.png"), draft:citrus, info:"Illustrated reference · prepared transcription"},
     {name:"Café Lunch Edition · two-column menu", image:require("./assets/lunch-edition.jpg"), draft:lunch, info:"Recreated restaurant menu · prepared transcription"},
 ];
+const homeMotion = "@media(prefers-reduced-motion:no-preference){[data-testid=home-card]{animation:home-in .32s ease-out both;transition:transform .18s ease,box-shadow .18s ease}[data-testid=home-card]:hover{transform:translateY(-2px);box-shadow:0 8px 24px #512d1514}[role=button]{transition:opacity .15s ease,transform .15s ease}@keyframes home-in{from{opacity:.4;translate:0 6px}to{opacity:1;translate:0 0}}}";
 const storageKey = "menu-review.saved.v1";
 function browserMenus(): SavedMenu[] {
 	return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
@@ -111,6 +112,11 @@ export default function App() {
     const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
 	const [sample,setSample]=useState(0);
+    useEffect(()=>{
+        if(Platform.OS!=="web") return;
+        const style=document.createElement("style");style.textContent=homeMotion;document.head.append(style);
+        return ()=>style.remove();
+    },[]);
     const [setup,setSetup]=useState(false);
     const isSample=source==="SAMPLE MENU";
 	const [currency, setCurrency] = useState("INR");
@@ -306,14 +312,14 @@ export default function App() {
 				keyboardShouldPersistTaps="handled"
 			>
 				<View style={styles.nav}>
-					<Text style={styles.brand}>MENU / REVIEW</Text>
+					<Text style={styles.brand}>◩  Menu Press</Text>
 					<Text style={styles.small}>{screen==="upload"?"01 / Upload":screen==="review"?"02 / Verify":"03 / Menus"}</Text>
                 </View>
                 {screen!=="upload" && <Button secondary title="Back to uploads" disabled={busy} onPress={()=>{setMessage("");setScreen("upload")}} />}
                 {screen==="upload" && <>
                 <View style={styles.hero}>
-                    <Text style={styles.eyebrow}>RESTAURANT MENU IMPORTER</Text>
-                    <Text style={styles.title}>Import your menu.</Text>
+                    <Text style={styles.eyebrow}>THE RESTAURANT WORKSPACE</Text>
+                    <Text style={styles.title}>From print to plate.</Text>
                     <Text style={styles.subtitle}>Start with a menu photo. Check the dishes and prices, then save the menu.</Text>
                 </View>
                 {source ? <Button title="Continue verifying draft" onPress={()=>setScreen("review")} /> : null}
@@ -335,23 +341,19 @@ export default function App() {
 						autoCapitalize="none"
 					/>
 				</View>}
-				<View style={{padding:22,backgroundColor:"#fff0de",borderRadius:16,gap:9,marginBottom:18}}>
-                    <Text style={styles.eyebrow}>01 / LIVE IMPORT</Text><Text style={styles.heading}>Use your own API</Text>
-                    <Text style={styles.small}>Connect a provider on your server and scan your restaurant’s menu.</Text>
-                    <Button title={publicDemo ? (setup?"Hide setup":"Set up my API") : "Upload menu photo"} disabled={busy||(!publicDemo&&!token)} onPress={publicDemo?()=>setSetup(!setup):selectPhoto}/>
-                    {setup && <Text style={styles.small}>Copy .env.example to .env, set OPENROUTER_API_KEY, and start the app with Docker. {Platform.OS==="web" && <a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Open setup guide ↗</a>}</Text>}
+				<View style={styles.homeGrid}>
+                {[
+                    {number:"01 / IMPORT",title:"Use your own API",detail:"Scan a menu photo with Gemini on your server.",image:require("./public/kitchen/pepper-melt.jpg"),button:publicDemo?(setup?"Hide setup":"Set up my API"):"Upload menu photo"},
+                    {number:"02 / EXPLORE",title:"Recorded demos",detail:"Explore three menus, from simple print to illustrated specials.",image:require("./assets/citrus-window.png"),button:"Open menu demos"},
+                    {number:"03 / COLLECTION",title:"Saved menus",detail:publicDemo?"Reopen the menus you’ve saved in this browser.":"Browse the menus saved to your restaurant.",image:require("./public/kitchen/berry-cheesecake.jpg"),button:"View saved menus"}
+                ].map((card,i)=><View key={card.number} testID="home-card" style={styles.homeCard}>
+                    <Image source={card.image} accessibilityLabel={card.title+" cover"} resizeMode="cover" style={styles.cover}/>
+                    <View style={styles.cardBody}><Text style={styles.eyebrow}>{card.number}</Text><Text style={styles.cardTitle}>{card.title}</Text>
+                    <Text style={[styles.small,{flex:1}]}>{card.detail}</Text>
+                    <Button title={card.button} onPress={()=>{if(i===0){if(publicDemo)setSetup(!setup);else selectPhoto()}else if(i===1)openExample(0);else void action(async()=>{await refresh();setScreen("saved")})}} disabled={busy||(!publicDemo&&!token&&i!==1)} /></View>
+                </View>)}
                 </View>
-                <View style={{marginBottom:22,gap:9}}>
-                    <Image source={require("./assets/citrus-window.png")} accessibilityLabel="Illustrated Citrus Window menu" resizeMode="cover" style={{height:160,borderRadius:14,width:"100%"}}/>
-                    <Text style={styles.eyebrow}>02 / EXPLORE</Text><Text style={styles.heading}>Recorded demos</Text>
-                    <Text style={styles.small}>Choose a menu photo, compare its transcription and edit the dishes.</Text>
-                    <Button title="Open menu demos" disabled={busy} onPress={()=>openExample(0)}/>
-                </View>
-                <View style={{borderTopWidth:1,borderColor:"#dfd8d0",paddingVertical:18,gap:8}}>
-                    <Text style={styles.eyebrow}>03 / YOUR COLLECTION</Text><Text style={styles.heading}>Saved menus</Text>
-                    <Text style={styles.small}>{publicDemo?"Menus you save in this browser appear here.":"See the menus saved to your restaurant."}</Text>
-                    <Button secondary title="View saved menus" disabled={busy||(!publicDemo&&!token)} onPress={()=>void action(async()=>{await refresh();setScreen("saved")})}/>
-                </View>
+                {publicDemo && setup && <View style={styles.notice}><Text>Copy .env.example to .env, set OPENROUTER_API_KEY, and start the server. {Platform.OS==="web" && <a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Open setup guide ↗</a>}</Text></View>}
                 </>}
                 {busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
@@ -599,12 +601,18 @@ export default function App() {
 					)}
 				</View>}
 				
-			</ScrollView>
+			<View style={styles.imprint}><Text style={styles.brand}>Menu Press</Text><Text style={styles.small}>Restaurant menu studio  /  Zaid Qureshi</Text></View>
+            </ScrollView>
 		</>
 	);
 }
 const styles = StyleSheet.create({
-	screen: { flex: 1, backgroundColor: "#faf9f7" },
+	homeGrid:{flexDirection:"row",flexWrap:"wrap",gap:16,justifyContent:"center"},
+    homeCard:{height:355,width:"100%",maxWidth:312,borderWidth:1,borderColor:"#d7c9ba",borderRadius:18,overflow:"hidden",backgroundColor:"#fffaf3"},
+    cardBody:{flex:1,padding:17,gap:5},cardTitle:{fontFamily:"serif",fontWeight:"700",fontSize:27,color:"#35251b"},
+    cover:{width:"100%",height:160,backgroundColor:"#f7ebd6"},
+    imprint:{marginTop:36,paddingVertical:20,borderTopWidth:2,borderColor:"#a64c17",flexDirection:"row",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8},
+    screen: { flex: 1, backgroundColor: "#faf9f7" },
 	page: {
 		maxWidth: 1050,
 		width: "100%",
