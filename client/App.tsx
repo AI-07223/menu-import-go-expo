@@ -197,6 +197,7 @@ export default function App() {
 						</Text>
 					</View>
 					<TextInput
+						editable={!busy}
 						style={[styles.input, { minWidth: 220, flex: 1 }]}
 						accessibilityLabel="Operator token"
 						secureTextEntry
@@ -267,6 +268,7 @@ export default function App() {
 						)}
 						<Text style={[styles.label, { marginTop: 20 }]}>Menu name</Text>
 						<TextInput
+							editable={!busy}
 							accessibilityLabel="Menu name"
 							style={styles.input}
 							value={name}
@@ -302,6 +304,7 @@ export default function App() {
 									<View style={styles.field}>
 										<Text style={styles.label}>Dish name</Text>
 										<TextInput
+											editable={!busy}
 											accessibilityLabel={`Dish ${index + 1} name`}
 											style={styles.input}
 											value={item.name}
@@ -312,6 +315,7 @@ export default function App() {
 									<View style={styles.field}>
 										<Text style={styles.label}>Category</Text>
 										<TextInput
+											editable={!busy}
 											accessibilityLabel={`Dish ${index + 1} category`}
 											style={styles.input}
 											value={item.category}
@@ -322,6 +326,7 @@ export default function App() {
 									<View style={[styles.field, { flex: 0.6 }]}>
 										<Text style={styles.label}>Price · INR</Text>
 										<TextInput
+											editable={!busy}
 											accessibilityLabel={`Dish ${index + 1} price in rupees`}
 											style={styles.input}
 											value={item.price}
@@ -345,6 +350,7 @@ export default function App() {
 										<Pressable
 											key={choice.label}
 											accessibilityRole="radio"
+											disabled={busy}
 											accessibilityState={{
 												checked: item.vegetarian === choice.value,
 											}}
@@ -375,6 +381,7 @@ export default function App() {
 										<View style={styles.field}>
 											<Text style={styles.label}>Portion</Text>
 											<TextInput
+												editable={!busy}
 												accessibilityLabel={`Dish ${index + 1} portion ${vi + 1} name`}
 												style={styles.input}
 												value={variant.name}
@@ -390,6 +397,7 @@ export default function App() {
 										<View style={styles.field}>
 											<Text style={styles.label}>Portion price · INR</Text>
 											<TextInput
+												editable={!busy}
 												accessibilityLabel={`Dish ${index + 1} portion ${vi + 1} price`}
 												style={styles.input}
 												keyboardType="decimal-pad"
