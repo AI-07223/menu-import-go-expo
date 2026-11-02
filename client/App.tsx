@@ -24,6 +24,7 @@ import {
 } from "./src/menu";
 
 import house from "./public/kitchen/catalog.json";
+import {scanWithReviewerKey} from "./src/reviewerScan";
 import catalog from "./src/catalog.json";
 import { closestDish } from "./src/matching";
 import citrus from "./src/citrus.json";
@@ -100,7 +101,10 @@ export default function App() {
 	const [source, setSource] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [message, setMessage] = useState("");
-	const [error, setError] = useState("");
+	const [screen,setScreen]=useState<"upload"|"review"|"saved">("upload");
+    const [liveKey,setLiveKey]=useState("");
+    const [showKey,setShowKey]=useState(false);
+    const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
 	const illustrated = source === "ILLUSTRATED MENU · AUTHORED ANSWER KEY";
 	const [currency, setCurrency] = useState("INR");
@@ -140,7 +144,7 @@ export default function App() {
 	}
 	function illustratedDemo() {
         setCurrency("USD");
-        setItems(editDraft(citrus));
+        setScreen("review"); setItems(editDraft(citrus));
         setName("Citrus Window");
         setPhoto(null);
         setSource("ILLUSTRATED MENU · AUTHORED ANSWER KEY");
@@ -156,7 +160,7 @@ export default function App() {
 			);
 			setCurrency(data.demoDraft.currency);
             setName("My restaurant menu");
-            setItems(editDraft(data.demoDraft));
+            setScreen("review"); setItems(editDraft(data.demoDraft));
 			setPhoto(null);
 			setSource("RECORDED DEMO · NO AI CALL");
 			setMessage(
@@ -215,16 +219,17 @@ export default function App() {
                     reader.onerror = () => reject(new Error("Could not read this image."));
                     reader.readAsDataURL(file);
                 });
-                if (!match && publicDemo) {
+                if (!match && publicDemo && !(showKey && liveKey.trim())) {
+                    setScreen("review");
                     setItems([{name:"",category:"Menu",price:"",vegetarian:null,variants:[]}]);
                     setPhoto(uri); setName("My restaurant menu"); setCurrency("UNKNOWN");
                     setSource("MANUAL REVIEW"); setMessage("Keep this menu alongside your draft. Enter the dishes below and attach individual photos if you have them."); return;
                 }
-                const draft = match?.draft ?? (await request<{scanMenu: Draft}>(baseURL, token,
-                    `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu;
+                const draft = match?.draft ?? (publicDemo ? await scanWithReviewerKey(uri,liveKey.trim()) : (await request<{scanMenu: Draft}>(baseURL, token,
+                    `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu);
                 setCurrency(draft.currency);
                 setName(match?.title ?? "My restaurant menu");
-                setItems(editDraft(draft));
+                setScreen("review"); setItems(editDraft(draft));
                 setPhoto(uri);
                 setSource(match ? "EXACT IMAGE MATCH · CATALOG" : "LIVE EXTRACTION · REVIEW REQUIRED");
                 setMessage(match ? "This image matches the reference file exactly. Loaded its recorded prices." : "Check the extracted values against the photo.");
@@ -256,7 +261,7 @@ export default function App() {
 			);
 			setCurrency(data.scanMenu.currency);
             setPhoto(asset.uri);
-			setItems(editDraft(data.scanMenu));
+			setScreen("review"); setItems(editDraft(data.scanMenu));
 			setSource("LIVE EXTRACTION · REVIEW REQUIRED");
 			setMessage(
 				data.scanMenu.items.length
@@ -277,7 +282,7 @@ export default function App() {
                 const recent = [menu, ...browserMenus()].slice(0, 10);
                 localStorage.setItem(storageKey, JSON.stringify(recent));
                 setSaved(recent);
-                setItems([]); setSource("");
+                setItems([]); setSource(""); setScreen("saved");
                 setMessage("Saved in this browser. Reload saved menus to see it again.");
                 return;
             }
@@ -297,7 +302,7 @@ export default function App() {
 				data.saveMenu,
 				...current.filter((m) => m.id !== data.saveMenu.id),
 			]);
-			setItems([]); setSource("");
+			setItems([]); setSource(""); setScreen("saved");
 			setMessage(
 				`Saved ${data.saveMenu.items.length} dishes to PostgreSQL. Reload saved menus to verify persistence.`,
 			);
@@ -306,24 +311,28 @@ export default function App() {
 	return (
 		<>
 			<StatusBar style="dark" />
-			<ScrollView
-				style={styles.screen}
+			{!!error && <View style={{position:Platform.OS==="web"?("fixed" as "absolute"):"absolute",top:0,left:0,right:0,zIndex:1000,backgroundColor:"#792a1a",paddingHorizontal:18,paddingVertical:10,flexDirection:"row",alignItems:"center",gap:12}}>
+                <Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={{flex:1,color:"white",fontWeight:"600"}}>{error}</Text>
+                <Pressable accessibilityRole="button" accessibilityLabel="Dismiss error" onPress={()=>setError("")} style={{padding:10}}><Text style={{color:"white",fontWeight:"700"}}>Dismiss ×</Text></Pressable>
+            </View>}
+            <ScrollView key={screen}
+                style={styles.screen}
 				contentContainerStyle={styles.page}
 				keyboardShouldPersistTaps="handled"
 			>
 				<View style={styles.nav}>
 					<Text style={styles.brand}>MENU / REVIEW</Text>
-					<Text style={styles.small}>A focused engineering sample</Text>
-				</View>
-				<View style={styles.hero}>
-					<Text style={styles.eyebrow}>EXTRACT → REVIEW → SAVE</Text>
-					<Text style={styles.title}>A menu worth{`\n`}a second look.</Text>
-					<Text style={styles.subtitle}>
-						Turn a photo into a draft. Keep the judgment with the person who
-						knows the menu.
-					</Text>
-				</View>
-				{!publicDemo && <View style={styles.access}>
+					<Text style={styles.small}>{screen==="upload"?"01 / Upload":screen==="review"?"02 / Verify":"03 / Menus"}</Text>
+                </View>
+                {screen!=="upload" && <Button secondary title="Back to uploads" disabled={busy} onPress={()=>{setMessage("");setScreen("upload")}} />}
+                {screen==="upload" && <>
+                <View style={styles.hero}>
+                    <Text style={styles.eyebrow}>RESTAURANT MENU IMPORTER</Text>
+                    <Text style={styles.title}>Import your menu.</Text>
+                    <Text style={styles.subtitle}>Start with a menu photo. Check the dishes and prices, then save the menu.</Text>
+                </View>
+                {source ? <Button title="Continue verifying draft" onPress={()=>setScreen("review")} /> : null}
+                {!publicDemo && <View style={styles.access}>
 					<View style={{ flex: 1, minWidth: 180 }}>
 						<Text style={styles.label}>Operator token</Text>
 						<Text style={styles.small}>
@@ -341,37 +350,21 @@ export default function App() {
 						autoCapitalize="none"
 					/>
 				</View>}
-				<View style={styles.actions}>
-                    {publicDemo && <Button title="Review illustrated menu" onPress={illustratedDemo} disabled={busy} />} 
-					<Button
-						title="Try recorded demo"
-						onPress={demo}
-						disabled={busy || (!publicDemo && !token)}
-					/>
-					{<Button
-                        title="Upload menu photo"
-						onPress={selectPhoto}
-                        disabled={busy || (!publicDemo && !token)}
-                        secondary
-                    />}
-					<Button
-						title="Reload saved menus"
-						onPress={() => void action(refresh)}
-						disabled={busy || (!publicDemo && !token)}
-						secondary
-					/>
-				</View>
-				<Text style={styles.small}>
-					{publicDemo ? "Try the recorded menu, edit a dish, and save. Your last ten menus stay in this browser. Photo matching runs in your browser." : "Demo uses a recorded synthetic extraction. Photo extraction sends your image to configured AI providers; it requires a server-side API key."}
-                </Text>
-				{busy && (
+				{publicDemo && <View style={{gap:8}}>
+                    <Button secondary disabled={busy} title={showKey?"Close AI scan settings":"Set up live AI scanning"} onPress={()=>{setShowKey(!showKey);setLiveKey("")}} />
+                    {showKey && <><Text style={styles.small}>For a new photo, your browser sends the image directly to OpenRouter using your credits. Gemini 2.5 Flash-Lite reads the menu. Your key stays in memory.</Text><TextInput accessibilityLabel="OpenRouter API key" style={styles.input} value={liveKey} editable={!busy} secureTextEntry autoCapitalize="none" onChangeText={setLiveKey} placeholder="OpenRouter API key" /></>}
+                </View>}
+                <View style={styles.actions}>
+                    <Button title="Upload menu photo" onPress={selectPhoto} disabled={busy || (!publicDemo && !token)} />
+                    <Button secondary title="Try recorded demo" onPress={demo} disabled={busy || (!publicDemo && !token)} />
+                    {publicDemo && <Button secondary title="Review illustrated menu" onPress={illustratedDemo} disabled={busy} />}
+                    <Button secondary title="View saved menus" disabled={busy || (!publicDemo && !token)} onPress={()=>void action(async()=>{await refresh();setScreen("saved")})} />
+                </View>
+                <Text style={styles.small}>{publicDemo?"Try a sample without a key. For your own photo, enable live AI scanning or enter dishes manually. Saved menus stay in this browser.":"Photo extraction uses the configured AI provider. Reviewed menus are saved to the restaurant database."}</Text>
+                </>}
+                {busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
 						Working…
-					</Text>
-				)}
-				{!!error && (
-					<Text accessibilityRole="alert" style={styles.error}>
-						{error}
 					</Text>
 				)}
 				{!!message && (
@@ -379,7 +372,7 @@ export default function App() {
 						{message}
 					</Text>
 				)}
-				{(!!items.length || !!source) && (
+				{screen==="review" && (
 					<View style={styles.section}>
 						<Text style={styles.eyebrow}>{source}</Text>
 						<View style={styles.headingRow}>
@@ -571,12 +564,12 @@ export default function App() {
 						/>
 					</View>
 				)}
-				<View style={styles.section}>
+				{screen==="saved" && <View style={styles.section}>
 					<Text style={styles.eyebrow}>{publicDemo ? "SAVED IN THIS BROWSER" : "PERSISTED IN POSTGRESQL"}</Text>
 					<Text style={styles.heading}>Saved menus</Text>
 					{!saved.length ? (
 						<Text style={styles.small}>
-							No menus loaded. Connect and reload, or save a reviewed draft.
+							Your verified menus will appear here after you save your first import.
 						</Text>
 					) : (
 						saved.map((entry) => (
@@ -608,7 +601,7 @@ export default function App() {
 							</View>
 						))
 					)}
-				</View>
+				</View>}
 				<Text style={styles.footer}>
 					AI-assisted implementation · Human-reviewed data · No automatic
 					publishing
