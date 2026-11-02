@@ -19,6 +19,7 @@ import {
 	editDraft,
 	issues,
 	priceText,
+	parsePrice,
 	reviewedItems,
 } from "./src/menu";
 
@@ -61,6 +62,17 @@ function Button({
 		</Pressable>
 	);
 }
+function PriceControl({label, value, onChange, busy}: {
+    label: string; value: string; onChange: (value: string) => void; busy: boolean;
+}) {
+    const amount = parsePrice(value);
+    function step(delta: number, symbol: string) {
+        const next = (amount ?? 0) + delta;
+        const disabled = busy || next <= 0 || next > 9999999 || (amount === null && value.trim() !== "");
+        return <Pressable accessibilityRole="button" accessibilityLabel={label + (delta > 0 ? ", increase by one rupee" : ", decrease by one rupee")} disabled={disabled} onPress={() => onChange(priceText(next))} style={[styles.step, disabled && {opacity: 0.4}]}><Text style={styles.stepText}>{symbol}</Text></Pressable>;
+    }
+    return <View style={styles.stepper}>{step(-100, "−")}<TextInput accessibilityLabel={label} editable={!busy} keyboardType="decimal-pad" value={value} onChangeText={onChange} style={[styles.input, {flex: 1, minWidth: 0, textAlign: "center"}]} />{step(100, "+")}</View>;
+}
 export default function App() {
 	const [token, setToken] = useState("");
 	const [items, setItems] = useState<EditableItem[]>([]);
@@ -70,6 +82,7 @@ export default function App() {
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
+	const [softPhoto, setSoftPhoto] = useState(false);
 	const [photo, setPhoto] = useState<string | null>(null);
 	const lock = useRef(false);
 	const invalid = issues(items);
@@ -274,7 +287,12 @@ export default function App() {
 							All prices are INR. Unknown dietary labels and invalid prices must
 							be resolved. Review model-provided labels too.
 						</Text>
-						{photo && (
+						{!photo && source.startsWith("RECORDED") && <View style={{marginTop: 16}}>
+                            <Text style={styles.label}>Sample menu photo · {softPhoto ? "soft focus" : "clear print"}</Text>
+                            <Image accessibilityLabel="Simulated restaurant menu with six dishes and printed prices" source={softPhoto ? require("./assets/sample-blurred.png") : require("./assets/sample-clear.png")} resizeMode="contain" style={{width:"100%",height:250,backgroundColor:"#eee9de",borderRadius:10}} />
+                            <Button secondary disabled={busy} title={softPhoto ? "View clear photo" : "View soft-focus photo"} onPress={() => setSoftPhoto(!softPhoto)} />
+                        </View>}
+                        {photo && (
 							<Image
 								accessibilityLabel="Uploaded menu reference"
 								source={{ uri: photo }}
@@ -339,15 +357,13 @@ export default function App() {
 											onChangeText={(category) => change(index, { category })}
 										/>
 									</View>
-									<View style={[styles.field, { flex: 0.6 }]}>
+									<View style={{minWidth: 170, flexGrow: 1}}>
 										<Text style={styles.label}>Price · INR</Text>
-										<TextInput
-											editable={!busy}
-											accessibilityLabel={`Dish ${index + 1} price in rupees`}
-											style={styles.input}
+										<PriceControl
+											busy={busy}
+											label={`Dish ${index + 1} price in rupees`}
 											value={item.price}
-											keyboardType="decimal-pad"
-											onChangeText={(price) => change(index, { price })}
+											onChange={(price) => change(index, { price })}
 										/>
 									</View>
 								</View>
@@ -387,7 +403,7 @@ export default function App() {
 															: "#183e35",
 												}}
 											>
-												{choice.label}
+                                                {choice.value === null ? "Review" : choice.value ? "Veg" : "Non-veg"}
 											</Text>
 										</Pressable>
 									))}
@@ -412,13 +428,11 @@ export default function App() {
 										</View>
 										<View style={styles.field}>
 											<Text style={styles.label}>Portion price · INR</Text>
-											<TextInput
-												editable={!busy}
-												accessibilityLabel={`Dish ${index + 1} portion ${vi + 1} price`}
-												style={styles.input}
-												keyboardType="decimal-pad"
+											<PriceControl
+												busy={busy}
+												label={`Dish ${index + 1} portion ${vi + 1} price`}
 												value={variant.price}
-												onChangeText={(price) =>
+												onChange={(price) =>
 													change(index, {
 														variants: item.variants.map((v, j) =>
 															j === vi ? { ...v, price } : v,
@@ -439,7 +453,7 @@ export default function App() {
 					</View>
 				)}
 				<View style={styles.section}>
-					<Text style={styles.eyebrow}>PERSISTED IN POSTGRESQL</Text>
+					<Text style={styles.eyebrow}>{publicDemo ? "SAVED IN THIS BROWSER" : "PERSISTED IN POSTGRESQL"}</Text>
 					<Text style={styles.heading}>Saved menus</Text>
 					{!saved.length ? (
 						<Text style={styles.small}>
@@ -616,10 +630,13 @@ const styles = StyleSheet.create({
 	needsAttention: { borderColor: "#bd7547", backgroundColor: "#fff7e9" },
 	fields: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 10 },
 	field: { flex: 1, minWidth: 140 },
-	choices: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 },
+	stepper: {flexDirection:"row", alignItems:"center", gap:4},
+    step: {width:44,height:44,borderRadius:8,backgroundColor:"#e6ede3",alignItems:"center",justifyContent:"center"},
+    stepText: {fontSize:22,color:"#183e35"},
+    choices: { flexDirection: "row", backgroundColor:"#e8ece4", padding:3, borderRadius:10, marginTop:12 },
 	choice: {
 		paddingVertical: 10,
-		paddingHorizontal: 13,
+		flex:1, minHeight:44, alignItems:"center", justifyContent:"center",
 		borderWidth: 1,
 		borderColor: "#cdd5c8",
 		borderRadius: 7,
