@@ -56,7 +56,7 @@ function Button({
 				disabled && { opacity: 0.45 },
 			]}
 		>
-			<Text style={[styles.buttonText, secondary && { color: "#183e35" }]}>
+			<Text style={[styles.buttonText, secondary && { color: "#252321" }]}>
 				{title}
 			</Text>
 		</Pressable>
@@ -69,9 +69,25 @@ function PriceControl({label, value, onChange, busy}: {
     function step(delta: number, symbol: string) {
         const next = (amount ?? 0) + delta;
         const disabled = busy || next <= 0 || next > 9999999 || (amount === null && value.trim() !== "");
-        return <Pressable accessibilityRole="button" accessibilityLabel={label + (delta > 0 ? ", increase by one rupee" : ", decrease by one rupee")} disabled={disabled} onPress={() => onChange(priceText(next))} style={[styles.step, disabled && {opacity: 0.4}]}><Text style={styles.stepText}>{symbol}</Text></Pressable>;
+        const direction = delta > 0 ? "increase" : "decrease";
+        const units = Math.abs(delta) === 100 ? "one rupee" : "ten rupees";
+        return (
+            <Pressable accessibilityRole="button" accessibilityLabel={label + ", " + direction + " by " + units}
+                disabled={disabled} onPress={() => onChange(priceText(next))}
+                style={[styles.step, disabled && {opacity: 0.4}]}>
+                <Text style={styles.stepText}>{symbol}</Text>
+            </Pressable>
+        );
     }
-    return <View style={styles.stepper}>{step(-100, "−")}<TextInput accessibilityLabel={label} editable={!busy} keyboardType="decimal-pad" value={value} onChangeText={onChange} style={[styles.input, {flex: 1, minWidth: 0, textAlign: "center"}]} />{step(100, "+")}</View>;
+    return (
+        <View style={{gap: 5}}>
+            <TextInput accessibilityLabel={label} editable={!busy} keyboardType="decimal-pad"
+                value={value} onChangeText={onChange} style={styles.input} />
+            <View style={styles.stepper}>
+                {step(-1000, "−10")}{step(-100, "−1")}{step(100, "+1")}{step(1000, "+10")}
+            </View>
+        </View>
+    );
 }
 export default function App() {
 	const [token, setToken] = useState("");
@@ -400,7 +416,7 @@ export default function App() {
 													color:
 														item.vegetarian === choice.value
 															? "#fff"
-															: "#183e35",
+															: "#252321",
 												}}
 											>
                                                 {choice.value === null ? "Review" : choice.value ? "Veg" : "Non-veg"}
@@ -498,7 +514,7 @@ export default function App() {
 	);
 }
 const styles = StyleSheet.create({
-	screen: { flex: 1, backgroundColor: "#f6f3ec" },
+	screen: { flex: 1, backgroundColor: "#faf9f7" },
 	page: {
 		maxWidth: 1050,
 		width: "100%",
@@ -514,17 +530,17 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingVertical: 24,
 		borderBottomWidth: 1,
-		borderColor: "#d9ded4",
+		borderColor: "#dedbd8",
 	},
 	brand: {
 		fontSize: 18,
 		fontWeight: "800",
-		color: "#183e35",
+		color: "#252321",
 		letterSpacing: 2,
 	},
 	hero: { paddingVertical: 38 },
 	eyebrow: {
-		color: "#517364",
+		color: "#ac4600",
 		fontWeight: "700",
 		fontSize: 11,
 		letterSpacing: 2,
@@ -535,17 +551,17 @@ const styles = StyleSheet.create({
 		lineHeight: 53,
 		letterSpacing: -2,
 		fontWeight: "800",
-		color: "#183e35",
+		color: "#252321",
 	},
 	subtitle: {
 		fontSize: 17,
 		lineHeight: 26,
-		color: "#52645a",
+		color: "#515151",
 		maxWidth: 550,
 		marginTop: 16,
 	},
 	access: {
-		backgroundColor: "#e7ede3",
+		backgroundColor: "#fff0df",
 		padding: 18,
 		borderRadius: 14,
 		flexDirection: "row",
@@ -561,30 +577,30 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	button: {
-		backgroundColor: "#214e3d",
+		backgroundColor: "#b64a00",
 		paddingVertical: 14,
 		paddingHorizontal: 20,
 		borderRadius: 9,
 		alignItems: "center",
 	},
-	secondary: { backgroundColor: "#e5e9e0" },
+	secondary: { backgroundColor: "#ffe9cf" },
 	buttonText: { color: "#fff", fontSize: 14, fontWeight: "700" },
-	small: { fontSize: 12, lineHeight: 19, color: "#5d6b60" },
-	label: { fontSize: 12, fontWeight: "700", color: "#364c40", marginBottom: 6 },
+	small: { fontSize: 12, lineHeight: 19, color: "#585552" },
+	label: { fontSize: 12, fontWeight: "700", color: "#32302f", marginBottom: 6 },
 	input: {
 		backgroundColor: "#fff",
-		color: "#1b3327",
+		color: "#242424",
 		borderWidth: 1,
-		borderColor: "#cdd5c8",
+		borderColor: "#cdc9c5",
 		borderRadius: 7,
 		padding: 12,
 		fontSize: 15,
 	},
 	notice: {
 		padding: 14,
-		backgroundColor: "#e3efdf",
+		backgroundColor: "#fff0df",
 		borderRadius: 8,
-		color: "#1e4c31",
+		color: "#743400",
 		marginTop: 16,
 		lineHeight: 21,
 	},
@@ -600,7 +616,7 @@ const styles = StyleSheet.create({
 	heading: {
 		fontSize: 27,
 		fontWeight: "700",
-		color: "#183e35",
+		color: "#252321",
 		marginBottom: 8,
 	},
 	headingRow: {
@@ -612,8 +628,8 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	badge: {
-		color: "#425d46",
-		backgroundColor: "#e5eadf",
+		color: "#713500",
+		backgroundColor: "#ffe1bf",
 		padding: 8,
 		borderRadius: 7,
 		fontSize: 12,
@@ -621,8 +637,8 @@ const styles = StyleSheet.create({
 	card: {
 		padding: 20,
 		borderWidth: 1,
-		borderColor: "#dbe0d5",
-		backgroundColor: "#fffcf6",
+		borderColor: "#dedbd8",
+		backgroundColor: "#ffffff",
 		borderRadius: 12,
 		marginTop: 16,
 		marginBottom: 8,
@@ -631,20 +647,20 @@ const styles = StyleSheet.create({
 	fields: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 10 },
 	field: { flex: 1, minWidth: 140 },
 	stepper: {flexDirection:"row", alignItems:"center", gap:4},
-    step: {width:44,height:44,borderRadius:8,backgroundColor:"#e6ede3",alignItems:"center",justifyContent:"center"},
-    stepText: {fontSize:22,color:"#183e35"},
-    choices: { flexDirection: "row", backgroundColor:"#e8ece4", padding:3, borderRadius:10, marginTop:12 },
+    step: {flex:1,minWidth:34,height:44,borderRadius:8,backgroundColor:"#ffe3c3",alignItems:"center",justifyContent:"center"},
+    stepText: {fontSize:16,fontWeight:"700",color:"#252321"},
+    choices: { flexDirection: "row", backgroundColor:"#f3eeea", padding:3, borderRadius:10, marginTop:12 },
 	choice: {
 		paddingVertical: 10,
 		flex:1, minHeight:44, alignItems:"center", justifyContent:"center",
 		borderWidth: 1,
-		borderColor: "#cdd5c8",
+		borderColor: "#cdc9c5",
 		borderRadius: 7,
 	},
-	selected: { backgroundColor: "#335f48", borderColor: "#335f48" },
+	selected: { backgroundColor: "#a84100", borderColor: "#a84100" },
 	remove: { color: "#914d39", fontSize: 12 },
 	menuName: {
-		color: "#183e35",
+		color: "#252321",
 		fontSize: 20,
 		fontWeight: "700",
 		marginBottom: 6,
@@ -653,10 +669,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		gap: 16,
 		borderTopWidth: 1,
-		borderColor: "#e2e5db",
+		borderColor: "#e3ded9",
 		marginTop: 14,
 		paddingTop: 14,
 	},
-	dishName: { fontSize: 14, fontWeight: "600", color: "#2c4335" },
-	footer: { marginTop: 36, fontSize: 11, color: "#687566", lineHeight: 18 },
+	dishName: { fontSize: 14, fontWeight: "600", color: "#2d2b29" },
+	footer: { marginTop: 36, fontSize: 11, color: "#686461", lineHeight: 18 },
 });
