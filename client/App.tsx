@@ -1,0 +1,621 @@
+import { useRef, useState } from "react";
+import {
+	Platform,
+	Pressable,
+	ScrollView,
+	StyleSheet,
+	Text,
+	TextInput,
+	View,
+	Image,
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import * as ImagePicker from "expo-image-picker";
+import { fields, request } from "./src/api";
+import {
+	Draft,
+	EditableItem,
+	SavedMenu,
+	editDraft,
+	issues,
+	priceText,
+	reviewedItems,
+} from "./src/menu";
+
+const baseURL =
+	process.env.EXPO_PUBLIC_API_URL ??
+	(Platform.OS === "web" ? "" : "http://localhost:8780");
+function Button({
+	title,
+	onPress,
+	disabled = false,
+	secondary = false,
+}: {
+	title: string;
+	onPress: () => void;
+	disabled?: boolean;
+	secondary?: boolean;
+}) {
+	return (
+		<Pressable
+			accessibilityRole="button"
+			accessibilityLabel={title}
+			disabled={disabled}
+			onPress={onPress}
+			style={[
+				styles.button,
+				secondary && styles.secondary,
+				disabled && { opacity: 0.45 },
+			]}
+		>
+			<Text style={[styles.buttonText, secondary && { color: "#183e35" }]}>
+				{title}
+			</Text>
+		</Pressable>
+	);
+}
+export default function App() {
+	const [token, setToken] = useState("");
+	const [items, setItems] = useState<EditableItem[]>([]);
+	const [name, setName] = useState("My restaurant menu");
+	const [source, setSource] = useState("");
+	const [busy, setBusy] = useState(false);
+	const [message, setMessage] = useState("");
+	const [error, setError] = useState("");
+	const [saved, setSaved] = useState<SavedMenu[]>([]);
+	const [photo, setPhoto] = useState<string | null>(null);
+	const lock = useRef(false);
+	const invalid = issues(items);
+	async function action(work: () => Promise<void>) {
+		if (lock.current) return;
+		lock.current = true;
+		setBusy(true);
+		setError("");
+		setMessage("");
+		try {
+			await work();
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "Something went wrong.");
+		} finally {
+			lock.current = false;
+			setBusy(false);
+		}
+	}
+	function change(index: number, update: Partial<EditableItem>) {
+		setItems((current) =>
+			current.map((item, i) => (i === index ? { ...item, ...update } : item)),
+		);
+	}
+	async function refresh() {
+		const data = await request<{ menus: SavedMenu[] }>(
+			baseURL,
+			token,
+			`query { menus { id name ${fields} } }`,
+		);
+		setSaved(data.menus);
+	}
+	function demo() {
+		void action(async () => {
+			const data = await request<{ demoDraft: Draft }>(
+				baseURL,
+				token,
+				`query { demoDraft { ${fields} } }`,
+			);
+			setItems(editDraft(data.demoDraft));
+			setPhoto(null);
+			setSource("RECORDED DEMO · NO AI CALL");
+			setMessage(
+				"Loaded a recorded synthetic menu. Check the draft before saving.",
+			);
+		});
+	}
+	function scan() {
+		void action(async () => {
+			const result = await ImagePicker.launchImageLibraryAsync({
+				mediaTypes: ["images"],
+				base64: true,
+				quality: 0.85,
+			});
+			if (result.canceled) return;
+			const asset = result.assets[0];
+			if (
+				!asset.base64 ||
+				!["image/jpeg", "image/png"].includes(asset.mimeType ?? "")
+			)
+				throw new Error("Choose a PNG or JPEG image.");
+			if (asset.base64.length > 5_592_408)
+				throw new Error("Choose an image under 4 MiB.");
+			const data = await request<{ scanMenu: Draft }>(
+				baseURL,
+				token,
+				`mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`,
+				{ image: `data:${asset.mimeType};base64,${asset.base64}` },
+			);
+			setPhoto(asset.uri);
+			setItems(editDraft(data.scanMenu));
+			setSource("LIVE EXTRACTION · REVIEW REQUIRED");
+			setMessage(
+				data.scanMenu.items.length
+					? "Draft extracted. Verify every field against the image."
+					: "No dishes found. Try a clearer image.",
+			);
+		});
+	}
+	function save() {
+		void action(async () => {
+			if (!items.length || invalid || !name.trim())
+				throw new Error(
+					"Resolve every highlighted dish and enter a menu name before saving.",
+				);
+			const data = await request<{ saveMenu: SavedMenu }>(
+				baseURL,
+				token,
+				`mutation Save($input: ReviewedMenuInput!) { saveMenu(input: $input) { id name ${fields} } }`,
+				{
+					input: {
+						name: name.trim(),
+						currency: "INR",
+						items: reviewedItems(items),
+					},
+				},
+			);
+			setSaved((current) => [
+				data.saveMenu,
+				...current.filter((m) => m.id !== data.saveMenu.id),
+			]);
+			setItems([]);
+			setMessage(
+				`Saved ${data.saveMenu.items.length} dishes to PostgreSQL. Reload saved menus to verify persistence.`,
+			);
+		});
+	}
+	return (
+		<>
+			<StatusBar style="dark" />
+			<ScrollView
+				style={styles.screen}
+				contentContainerStyle={styles.page}
+				keyboardShouldPersistTaps="handled"
+			>
+				<View style={styles.nav}>
+					<Text style={styles.brand}>MENU / REVIEW</Text>
+					<Text style={styles.small}>A focused engineering sample</Text>
+				</View>
+				<View style={styles.hero}>
+					<Text style={styles.eyebrow}>EXTRACT → REVIEW → SAVE</Text>
+					<Text style={styles.title}>A menu worth{`\n`}a second look.</Text>
+					<Text style={styles.subtitle}>
+						Turn a photo into a draft. Keep the judgment with the person who
+						knows the menu.
+					</Text>
+				</View>
+				<View style={styles.access}>
+					<View style={{ flex: 1, minWidth: 180 }}>
+						<Text style={styles.label}>Operator token</Text>
+						<Text style={styles.small}>
+							Held in memory only. Use the token from your local setup.
+						</Text>
+					</View>
+					<TextInput
+						style={[styles.input, { minWidth: 220, flex: 1 }]}
+						accessibilityLabel="Operator token"
+						secureTextEntry
+						value={token}
+						onChangeText={setToken}
+						placeholder="Enter your operator token"
+						autoCapitalize="none"
+					/>
+				</View>
+				<View style={styles.actions}>
+					<Button
+						title="Try recorded demo"
+						onPress={demo}
+						disabled={busy || !token}
+					/>
+					<Button
+						title="Extract from photo"
+						onPress={scan}
+						disabled={busy || !token}
+						secondary
+					/>
+					<Button
+						title="Reload saved menus"
+						onPress={() => void action(refresh)}
+						disabled={busy || !token}
+						secondary
+					/>
+				</View>
+				<Text style={styles.small}>
+					Demo uses a recorded synthetic extraction. Photo extraction sends your
+					image to configured AI providers; it requires a server-side API key.
+				</Text>
+				{busy && (
+					<Text accessibilityLiveRegion="polite" style={styles.notice}>
+						Working…
+					</Text>
+				)}
+				{!!error && (
+					<Text accessibilityRole="alert" style={styles.error}>
+						{error}
+					</Text>
+				)}
+				{!!message && (
+					<Text accessibilityLiveRegion="polite" style={styles.notice}>
+						{message}
+					</Text>
+				)}
+				{!!items.length && (
+					<View style={styles.section}>
+						<Text style={styles.eyebrow}>{source}</Text>
+						<View style={styles.headingRow}>
+							<Text style={styles.heading}>Check the details.</Text>
+							<Text style={styles.badge}>
+								{items.length} dishes · {invalid} need attention
+							</Text>
+						</View>
+						<Text style={styles.small}>
+							All prices are INR. Unknown dietary labels and invalid prices must
+							be resolved. Review model-provided labels too.
+						</Text>
+						{photo && (
+							<Image
+								accessibilityLabel="Uploaded menu reference"
+								source={{ uri: photo }}
+								resizeMode="contain"
+								style={{ height: 220, marginTop: 16 }}
+							/>
+						)}
+						<Text style={[styles.label, { marginTop: 20 }]}>Menu name</Text>
+						<TextInput
+							accessibilityLabel="Menu name"
+							style={styles.input}
+							value={name}
+							onChangeText={setName}
+							maxLength={120}
+						/>
+						{items.map((item, index) => (
+							<View
+								key={index}
+								style={[
+									styles.card,
+									issues([item]) > 0 && styles.needsAttention,
+								]}
+							>
+								<View style={styles.headingRow}>
+									<Text style={styles.small}>
+										DISH {String(index + 1).padStart(2, "0")}
+									</Text>
+									<Pressable
+										accessibilityRole="button"
+										accessibilityLabel={`Remove dish ${index + 1}`}
+										disabled={busy}
+										onPress={() =>
+											setItems((current) =>
+												current.filter((_, i) => i !== index),
+											)
+										}
+									>
+										<Text style={styles.remove}>Remove</Text>
+									</Pressable>
+								</View>
+								<View style={styles.fields}>
+									<View style={styles.field}>
+										<Text style={styles.label}>Dish name</Text>
+										<TextInput
+											accessibilityLabel={`Dish ${index + 1} name`}
+											style={styles.input}
+											value={item.name}
+											maxLength={255}
+											onChangeText={(name) => change(index, { name })}
+										/>
+									</View>
+									<View style={styles.field}>
+										<Text style={styles.label}>Category</Text>
+										<TextInput
+											accessibilityLabel={`Dish ${index + 1} category`}
+											style={styles.input}
+											value={item.category}
+											maxLength={120}
+											onChangeText={(category) => change(index, { category })}
+										/>
+									</View>
+									<View style={[styles.field, { flex: 0.6 }]}>
+										<Text style={styles.label}>Price · INR</Text>
+										<TextInput
+											accessibilityLabel={`Dish ${index + 1} price in rupees`}
+											style={styles.input}
+											value={item.price}
+											keyboardType="decimal-pad"
+											onChangeText={(price) => change(index, { price })}
+										/>
+									</View>
+								</View>
+								<View
+									accessibilityRole="radiogroup"
+									accessibilityLabel={`Dish ${index + 1} dietary classification`}
+									style={styles.choices}
+								>
+									{(
+										[
+											{ label: "Needs review", value: null },
+											{ label: "Vegetarian", value: true },
+											{ label: "Non-vegetarian", value: false },
+										] as const
+									).map((choice) => (
+										<Pressable
+											key={choice.label}
+											accessibilityRole="radio"
+											accessibilityState={{
+												checked: item.vegetarian === choice.value,
+											}}
+											accessibilityLabel={`Dish ${index + 1}: ${choice.label}`}
+											onPress={() =>
+												change(index, { vegetarian: choice.value })
+											}
+											style={[
+												styles.choice,
+												item.vegetarian === choice.value && styles.selected,
+											]}
+										>
+											<Text
+												style={{
+													color:
+														item.vegetarian === choice.value
+															? "#fff"
+															: "#183e35",
+												}}
+											>
+												{choice.label}
+											</Text>
+										</Pressable>
+									))}
+								</View>
+								{item.variants.map((variant, vi) => (
+									<View key={vi} style={styles.fields}>
+										<View style={styles.field}>
+											<Text style={styles.label}>Portion</Text>
+											<TextInput
+												accessibilityLabel={`Dish ${index + 1} portion ${vi + 1} name`}
+												style={styles.input}
+												value={variant.name}
+												onChangeText={(name) =>
+													change(index, {
+														variants: item.variants.map((v, j) =>
+															j === vi ? { ...v, name } : v,
+														),
+													})
+												}
+											/>
+										</View>
+										<View style={styles.field}>
+											<Text style={styles.label}>Portion price · INR</Text>
+											<TextInput
+												accessibilityLabel={`Dish ${index + 1} portion ${vi + 1} price`}
+												style={styles.input}
+												keyboardType="decimal-pad"
+												value={variant.price}
+												onChangeText={(price) =>
+													change(index, {
+														variants: item.variants.map((v, j) =>
+															j === vi ? { ...v, price } : v,
+														),
+													})
+												}
+											/>
+										</View>
+									</View>
+								))}
+							</View>
+						))}
+						<Button
+							title={`Save ${items.length} reviewed dishes`}
+							onPress={save}
+							disabled={busy}
+						/>
+					</View>
+				)}
+				<View style={styles.section}>
+					<Text style={styles.eyebrow}>PERSISTED IN POSTGRESQL</Text>
+					<Text style={styles.heading}>Saved menus</Text>
+					{!saved.length ? (
+						<Text style={styles.small}>
+							No menus loaded. Connect and reload, or save a reviewed draft.
+						</Text>
+					) : (
+						saved.map((entry) => (
+							<View key={entry.id} style={styles.card}>
+								<Text style={styles.menuName}>{entry.name}</Text>
+								<Text style={styles.small}>
+									{entry.items.length} dishes · {entry.currency}
+								</Text>
+								{entry.items.map((item, i) => (
+									<View key={i} style={styles.savedRow}>
+										<View style={{ flex: 1 }}>
+											<Text style={styles.dishName}>{item.name}</Text>
+											<Text style={styles.small}>
+												{item.category} ·{" "}
+												{item.vegetarian ? "Vegetarian" : "Non-vegetarian"}
+											</Text>
+											{item.variants.map((v, j) => (
+												<Text key={j} style={styles.small}>
+													{v.name} · INR {priceText(v.priceMinor)}
+												</Text>
+											))}
+										</View>
+										<Text style={styles.dishName}>
+											INR {priceText(item.priceMinor)}
+										</Text>
+									</View>
+								))}
+							</View>
+						))
+					)}
+				</View>
+				<Text style={styles.footer}>
+					AI-assisted implementation · Human-reviewed data · No automatic
+					publishing
+				</Text>
+			</ScrollView>
+		</>
+	);
+}
+const styles = StyleSheet.create({
+	screen: { flex: 1, backgroundColor: "#f6f3ec" },
+	page: {
+		maxWidth: 1050,
+		width: "100%",
+		alignSelf: "center",
+		paddingHorizontal: 24,
+		paddingBottom: 48,
+	},
+	nav: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		flexWrap: "wrap",
+		gap: 12,
+		paddingVertical: 24,
+		borderBottomWidth: 1,
+		borderColor: "#d9ded4",
+	},
+	brand: {
+		fontSize: 18,
+		fontWeight: "800",
+		color: "#183e35",
+		letterSpacing: 2,
+	},
+	hero: { paddingVertical: 38 },
+	eyebrow: {
+		color: "#517364",
+		fontWeight: "700",
+		fontSize: 11,
+		letterSpacing: 2,
+		marginBottom: 12,
+	},
+	title: {
+		fontSize: 48,
+		lineHeight: 53,
+		letterSpacing: -2,
+		fontWeight: "800",
+		color: "#183e35",
+	},
+	subtitle: {
+		fontSize: 17,
+		lineHeight: 26,
+		color: "#52645a",
+		maxWidth: 550,
+		marginTop: 16,
+	},
+	access: {
+		backgroundColor: "#e7ede3",
+		padding: 18,
+		borderRadius: 14,
+		flexDirection: "row",
+		alignItems: "center",
+		flexWrap: "wrap",
+		gap: 16,
+	},
+	actions: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		gap: 10,
+		marginTop: 18,
+		marginBottom: 12,
+	},
+	button: {
+		backgroundColor: "#214e3d",
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		borderRadius: 9,
+		alignItems: "center",
+	},
+	secondary: { backgroundColor: "#e5e9e0" },
+	buttonText: { color: "#fff", fontSize: 14, fontWeight: "700" },
+	small: { fontSize: 12, lineHeight: 19, color: "#5d6b60" },
+	label: { fontSize: 12, fontWeight: "700", color: "#364c40", marginBottom: 6 },
+	input: {
+		backgroundColor: "#fff",
+		color: "#1b3327",
+		borderWidth: 1,
+		borderColor: "#cdd5c8",
+		borderRadius: 7,
+		padding: 12,
+		fontSize: 15,
+	},
+	notice: {
+		padding: 14,
+		backgroundColor: "#e3efdf",
+		borderRadius: 8,
+		color: "#1e4c31",
+		marginTop: 16,
+		lineHeight: 21,
+	},
+	error: {
+		padding: 14,
+		backgroundColor: "#fae5de",
+		color: "#8a3021",
+		borderRadius: 8,
+		marginTop: 16,
+		lineHeight: 21,
+	},
+	section: { marginTop: 40 },
+	heading: {
+		fontSize: 27,
+		fontWeight: "700",
+		color: "#183e35",
+		marginBottom: 8,
+	},
+	headingRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		flexWrap: "wrap",
+		gap: 10,
+		alignItems: "center",
+		marginBottom: 12,
+	},
+	badge: {
+		color: "#425d46",
+		backgroundColor: "#e5eadf",
+		padding: 8,
+		borderRadius: 7,
+		fontSize: 12,
+	},
+	card: {
+		padding: 20,
+		borderWidth: 1,
+		borderColor: "#dbe0d5",
+		backgroundColor: "#fffcf6",
+		borderRadius: 12,
+		marginTop: 16,
+		marginBottom: 8,
+	},
+	needsAttention: { borderColor: "#bd7547", backgroundColor: "#fff7e9" },
+	fields: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 10 },
+	field: { flex: 1, minWidth: 140 },
+	choices: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 },
+	choice: {
+		paddingVertical: 10,
+		paddingHorizontal: 13,
+		borderWidth: 1,
+		borderColor: "#cdd5c8",
+		borderRadius: 7,
+	},
+	selected: { backgroundColor: "#335f48", borderColor: "#335f48" },
+	remove: { color: "#914d39", fontSize: 12 },
+	menuName: {
+		color: "#183e35",
+		fontSize: 20,
+		fontWeight: "700",
+		marginBottom: 6,
+	},
+	savedRow: {
+		flexDirection: "row",
+		gap: 16,
+		borderTopWidth: 1,
+		borderColor: "#e2e5db",
+		marginTop: 14,
+		paddingTop: 14,
+	},
+	dishName: { fontSize: 14, fontWeight: "600", color: "#2c4335" },
+	footer: { marginTop: 36, fontSize: 11, color: "#687566", lineHeight: 18 },
+});

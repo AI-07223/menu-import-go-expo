@@ -1,0 +1,9 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: [build, -t, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/menu-review:$BUILD_ID', .]
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/menu-review:$BUILD_ID'
+substitutions:
+  _REGION: us-central1
+  _REPOSITORY: menu-review
+# Builds only. Does not create databases, grant access, or deploy a service.

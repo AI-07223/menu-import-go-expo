@@ -1,0 +1,10 @@
+schema { query: Query, mutation: Mutation }
+type Query { demoDraft: Draft!, menus: [SavedMenu!]! }
+type Mutation { scanMenu(image: String!): Draft!, saveMenu(input: ReviewedMenuInput!): SavedMenu! }
+type Draft { currency: String!, items: [Item!]! }
+type Item { category: String!, name: String!, priceMinor: Int, vegetarian: Boolean, variants: [Variant!]! }
+type Variant { name: String!, priceMinor: Int }
+type SavedMenu { id: ID!, name: String!, currency: String!, items: [Item!]! }
+input VariantInput { name: String!, priceMinor: Int }
+input ItemInput { category: String!, name: String!, priceMinor: Int, vegetarian: Boolean, variants: [VariantInput!]! }
+input ReviewedMenuInput { name: String!, currency: String!, items: [ItemInput!]! }

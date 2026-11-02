@@ -1,0 +1,7 @@
+**/node_modules/
+**/.expo/
+client/dist/
+.env
+*.log
+*.test
+**/.claude/

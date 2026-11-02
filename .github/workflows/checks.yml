@@ -1,0 +1,21 @@
+name: Verify stack sample
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Go race tests with real PostgreSQL
+        run: docker compose --profile test run --rm test
+      - name: Build Go and Expo with TypeScript checks and client tests
+        run: docker compose build app
+      - name: Start complete application
+        run: docker compose up -d app
+      - name: Verify application health
+        run: curl --fail --retry 10 --retry-connrefused --retry-delay 2 http://localhost:8780/healthz
+      - name: Stop isolated services
+        if: always()
+        run: docker compose --profile test down

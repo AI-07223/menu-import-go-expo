@@ -1,0 +1,8 @@
+{
+  "fixture": "clear",
+  "provider": "Mistral",
+  "model": "pixtral-12b-2409",
+  "utc": "2026-11-01T09:59:28+00:00",
+  "status": "ok",
+  "elapsed_seconds": 8.507
+}
