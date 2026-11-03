@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
  category text NOT NULL,
  name text NOT NULL,
  price_minor integer NOT NULL CHECK (price_minor > 0 AND price_minor <= 9999999),
- vegetarian boolean NOT NULL,
+ vegetarian boolean,
  variants jsonb NOT NULL CHECK (jsonb_typeof(variants) = 'array'),
  PRIMARY KEY (menu_id, position),
  UNIQUE(menu_id, category, name)
@@ -24,3 +24,5 @@ DO $$ BEGIN
 END $$;
 
 ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS photo text;
+
+ALTER TABLE menu_items ALTER COLUMN vegetarian DROP NOT NULL;

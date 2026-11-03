@@ -19,7 +19,7 @@ func testImage() string {
 	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(b.Bytes())
 }
 func reply(w http.ResponseWriter, content string) {
-	json.NewEncoder(w).Encode(map[string]any{"choices": []any{map[string]any{"message": map[string]string{"content": content}}}})
+	json.NewEncoder(w).Encode(map[string]any{"choices": []any{map[string]any{"finish_reason": "stop", "message": map[string]string{"content": content}}}})
 }
 func TestMalformedProviderFallsBack(t *testing.T) {
 	first := 0
@@ -83,5 +83,19 @@ func TestAllProvidersFail(t *testing.T) {
 	scanner := Scanner{Client: server.Client(), Providers: []Provider{{URL: server.URL}, {URL: server.URL}}}
 	if _, err := scanner.Scan(context.Background(), testImage()); err == nil || calls != 2 {
 		t.Fatalf("all failures: %d %v", calls, err)
+	}
+}
+
+func TestIncompleteCompletionRejected(t *testing.T) {
+	for _, reason := range []string{"length", "content_filter", ""} {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			json.NewEncoder(w).Encode(map[string]any{"choices": []any{map[string]any{"finish_reason": reason, "message": map[string]string{"content": `{"categories":[]}`}}}})
+		}))
+		scanner := Scanner{Client: server.Client(), Providers: []Provider{{URL: server.URL}}}
+		_, err := scanner.Scan(context.Background(), testImage())
+		server.Close()
+		if err == nil {
+			t.Errorf("accepted incomplete reason %q", reason)
+		}
 	}
 }

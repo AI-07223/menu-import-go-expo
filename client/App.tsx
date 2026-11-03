@@ -25,12 +25,10 @@ import {
 } from "./src/menu";
 
 import house from "./public/kitchen/catalog.json";
-import catalog from "./src/catalog.json";
 import { closestDish } from "./src/matching";
 import citrus from "./src/citrus.json";
 import lunch from "./src/lunch.json";
 import recorded from "./src/recorded.json";
-const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
 
 const models = [
     {id:"reference",name:"Reference transcription"},
@@ -45,11 +43,6 @@ const examples = [
     {file:"lunch-edition.jpg",name:"Café Lunch Edition · two-column menu", image:require("./assets/lunch-edition.jpg"), draft:lunch, info:"Recreated restaurant menu · prepared transcription"},
 ];
 const homeMotion = "@media(prefers-reduced-motion:no-preference){[data-testid=home-card]{animation:home-in .32s ease-out both;transition:transform .18s ease,box-shadow .18s ease}[data-testid=home-card]:hover{transform:translateY(-2px);box-shadow:0 8px 24px #512d1514}[role=button]{transition:opacity .15s ease,transform .15s ease}@keyframes home-in{from{opacity:.4;translate:0 6px}to{opacity:1;translate:0 0}}}";
-const storageKey = "menu-review.saved.v1";
-function browserMenus(): SavedMenu[] {
-	return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
-}
-
 const baseURL =
 	process.env.EXPO_PUBLIC_API_URL ??
 	(Platform.OS === "web" ? "" : "http://localhost:8780");
@@ -127,7 +120,7 @@ export default function App() {
         const style=document.createElement("style");style.textContent=homeMotion;document.head.append(style);
         return ()=>style.remove();
     },[]);
-    const [setup,setSetup]=useState(false);
+    const sampleDrafts = useRef<Record<string, {items: EditableItem[]; name: string; currency: string}>>({});
     const isSample=source==="SAMPLE MENU";
     const selectedRun=runs[examples[sample].file+"|"+model];
     const pending=isSample && model!=="reference" && !selectedRun;
@@ -158,7 +151,6 @@ export default function App() {
 		);
 	}
 	async function refresh() {
-		if (publicDemo) { setSaved(browserMenus()); return; }
 		const data = await request<{ menus: SavedMenu[] }>(
 			baseURL,
 			token,
@@ -167,11 +159,22 @@ export default function App() {
 		setSaved(data.menus);
 	}
 	function openExample(index:number,selection=model) {
-        const example=examples[index];
-        const run=runs[example.file+"|"+selection];
-        const draft=selection==="reference"?example.draft:run?.draft;
-        setModel(selection);setSample(index);setCurrency(draft?.currency??"UNKNOWN");setItems(draft?editDraft(draft):[]);
-        setName(example.name);setPhoto(null);setSource("SAMPLE MENU");setScreen("review");setError("");setMessage("");
+        if (source && source !== "SAMPLE MENU") {
+            setError("Finish your current import before opening a recorded demo.");
+            return;
+        }
+        if (source === "SAMPLE MENU") {
+            sampleDrafts.current[examples[sample].file+"|"+model] = {items, name, currency};
+        }
+        const example = examples[index];
+        const run = runs[example.file+"|"+selection];
+        const draft = selection === "reference" ? example.draft : run?.draft;
+        const savedDraft = sampleDrafts.current[example.file+"|"+selection];
+        setModel(selection); setSample(index);
+        setCurrency(savedDraft?.currency ?? draft?.currency ?? "UNKNOWN");
+        setItems(savedDraft?.items ?? (draft ? editDraft(draft) : []));
+        setName(savedDraft?.name ?? example.name);
+        setPhoto(null); setSource("SAMPLE MENU"); setScreen("review"); setError(""); setMessage("");
     }
     function artwork(item: {name:string; photo?:string|null}) {
         if (item.photo) return item.photo;
@@ -203,45 +206,8 @@ export default function App() {
             change(index,{photo:uri});
         });
     }
-    function selectPhoto() {
-        if (Platform.OS !== "web") { scan(); return; }
-        const picker = document.createElement("input");
-        picker.type = "file";
-        picker.accept = "image/png,image/jpeg";
-        picker.onchange = () => {
-            const file = picker.files?.[0];
-            if (!file) return;
-            void action(async () => {
-                if (file.size > 4 * 1024 * 1024) throw new Error("Choose an image under 4 MiB.");
-                const bytes = await file.arrayBuffer();
-                const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
-                const digest = Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
-                const match = catalog.find(entry => entry.images.some(image => image.sha256 === digest));
-                
-                const uri = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(String(reader.result));
-                    reader.onerror = () => reject(new Error("Could not read this image."));
-                    reader.readAsDataURL(file);
-                });
-                if (!match && publicDemo) {
-                    setScreen("review");
-                    setItems([{name:"",category:"Menu",price:"",vegetarian:null,variants:[]}]);
-                    setPhoto(uri); setName("My restaurant menu"); setCurrency("UNKNOWN");
-                    setSource("MANUAL REVIEW"); setMessage("Keep this menu alongside your draft. Enter the dishes below and attach individual photos if you have them."); return;
-                }
-                const draft = match?.draft ?? (await request<{scanMenu: Draft}>(baseURL, token,
-                    `mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`, {image: uri})).scanMenu;
-                setCurrency(draft.currency);
-                setName(match?.title ?? "My restaurant menu");
-                setScreen("review"); setItems(editDraft(draft));
-                setPhoto(uri);
-                setSource(match ? "EXACT IMAGE MATCH · CATALOG" : "LIVE EXTRACTION · REVIEW REQUIRED");
-                setMessage(match ? "This image matches the reference file exactly. Loaded its recorded prices." : "Check the extracted values against the photo.");
-            });
-        };
-        picker.click();
-    }
+    function selectPhoto() { scan(); }
+
     function scan() {
 		void action(async () => {
 			const result = await ImagePicker.launchImageLibraryAsync({
@@ -282,15 +248,6 @@ export default function App() {
 				throw new Error(
 					"Resolve every highlighted dish and enter a menu name before saving.",
 				);
-			if (publicDemo) {
-                const menu = { id: crypto.randomUUID(), name: name.trim(), currency, items: reviewedItems(items) };
-                const recent = [menu, ...browserMenus()];
-                localStorage.setItem(storageKey, JSON.stringify(recent));
-                setSaved(recent);
-                setItems([]); setSource(""); setScreen("saved");
-                setMessage("Saved in this browser. Reload saved menus to see it again.");
-                return;
-            }
             const data = await request<{ saveMenu: SavedMenu }>(
 				baseURL,
 				token,
@@ -337,7 +294,7 @@ export default function App() {
                     <Text style={styles.subtitle}>Based on a menu import workflow in my Billing project, this sample combines AI extraction with a catalog of common dishes and images. It suggests close matches for misread names, then lets restaurant owners review and correct every detail before saving. Large menus become easier to import and verify.</Text>
                 </View>
                 {source ? <Button title="Continue verifying draft" onPress={()=>setScreen("review")} /> : null}
-                {!publicDemo && <View style={styles.access}>
+                {<View style={styles.access}>
 					<View style={{ flex: 1, minWidth: 180 }}>
 						<Text style={styles.label}>Operator token</Text>
 						<Text style={styles.small}>
@@ -355,19 +312,25 @@ export default function App() {
 						autoCapitalize="none"
 					/>
 				</View>}
-				<View style={styles.homeGrid}>
-                {[
-                    {number:"01 / IMPORT",title:"Use your own API",detail:"Scan a menu photo with Gemini on your server.",image:require("./assets/home-scan.png"),button:publicDemo?(setup?"Hide setup":"Set up my API"):"Upload menu photo"},
-                    {number:"02 / EXPLORE",title:"Recorded demos",detail:"Explore three menus, from simple print to illustrated specials.",image:require("./assets/home-compare.png"),button:"Open menu demos"},
-                    {number:"03 / COLLECTION",title:"Saved menus",detail:publicDemo?"Reopen the menus you’ve saved in this browser.":"Browse the menus saved to your restaurant.",image:require("./assets/home-saved.png"),button:"View saved menus"}
-                ].map((card,i)=><View key={card.number} testID="home-card" style={styles.homeCard}>
-                    <Image source={card.image} accessibilityLabel={card.title+" cover"} resizeMode="cover" style={styles.cover}/>
-                    <View style={styles.cardBody}><Text style={styles.eyebrow}>{card.number}</Text><Text style={styles.cardTitle}>{card.title}</Text>
-                    <Text style={[styles.small,{flex:1}]}>{card.detail}</Text>
-                    {i===0 && publicDemo && setup && <Text style={styles.small}>Copy .env.example to .env, set OPENROUTER_API_KEY, and start the server. {Platform.OS==="web" && <a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Open setup guide ↗</a>}</Text>}
-                    <Button title={card.button} onPress={()=>{if(i===0){if(publicDemo)setSetup(!setup);else selectPhoto()}else if(i===1)openExample(0);else void action(async()=>{await refresh();setScreen("saved")})}} disabled={busy||(!publicDemo&&!token&&i!==1)} /></View>
-                </View>)}
+                <View style={styles.homeGrid}>
+                    <View testID="home-card" style={styles.homeCard}>
+                        <Image source={require("./assets/home-scan.png")} accessibilityLabel="Import a menu photo" resizeMode="cover" style={styles.cover}/>
+                        <View style={styles.cardBody}>
+                            <Text style={styles.eyebrow}>01 / IMPORT</Text><Text style={styles.cardTitle}>Import a menu</Text>
+                            <Text style={[styles.small,{flex:1}]}>Upload a menu photo using your configured server. Set OPENROUTER_API_KEY in the server’s .env file to enable live scans.</Text>
+                            <Button title={busy ? "Working…" : "Upload menu photo"} onPress={selectPhoto} disabled={busy || !token} />
+                        </View>
+                    </View>
+                    <View testID="home-card" style={styles.homeCard}>
+                        <Image source={require("./assets/home-compare.png")} accessibilityLabel="Recorded menu examples" resizeMode="cover" style={styles.cover}/>
+                        <View style={styles.cardBody}>
+                            <Text style={styles.eyebrow}>02 / EXPLORE</Text><Text style={styles.cardTitle}>Recorded demos</Text>
+                            <Text style={[styles.small,{flex:1}]}>Explore three recorded menus and compare model output.</Text>
+                            <Button title="Open menu demos" disabled={busy} onPress={() => openExample(0)} />
+                        </View>
+                    </View>
                 </View>
+                <Button secondary title="View saved menus" disabled={busy || !token} onPress={() => void action(async () => {await refresh();setScreen("saved");})} />
 
                 </>}
                 {busy && (
@@ -399,8 +362,7 @@ export default function App() {
 							</Text>
 						</View>
 						<Text style={styles.small}>
-							All prices are {currency}. Unknown dietary labels and invalid prices must
-							be resolved. Color shows review priority. AI percentages are estimates, not measured accuracy. Compare the original photo for missing dishes.
+							All prices are {currency}. Review dietary labels and resolve invalid prices. Color shows review priority. AI percentages are estimates, not measured accuracy. Compare the original photo for missing dishes.
 						</Text>
 						{photo && (
 							<Image
@@ -424,7 +386,7 @@ export default function App() {
                             const incomplete = issues([item]) > 0;
                             const score = item.confidence;
                             const hue = incomplete ? 8 : item.verified ? 135 : score == null ? 40 : Math.round(10 + score * 0.78);
-                            const label = incomplete ? "Needs correction" : item.verified ? "Verified by you" : score == null ? "Ready to review" : score < 75 ? "Check against the photo" : "Review optional";
+                            const label = incomplete ? "Needs correction" : item.verified ? "Verified by you" : score == null ? "Ready to review" : "Check against the photo";
                             return (
 							<View
 								key={index}
@@ -503,7 +465,7 @@ export default function App() {
 								>
 									{(
 										[
-											{ label: "Needs review", value: null },
+											{ label: "Unspecified", value: null },
 											{ label: "Vegetarian", value: true },
 											{ label: "Non-vegetarian", value: false },
 										] as const
@@ -532,7 +494,7 @@ export default function App() {
 															: "#252321",
 												}}
 											>
-                                                {choice.value === null ? "Review" : choice.value ? "Veg" : "Non-veg"}
+                                                {choice.value === null ? "Unspecified" : choice.value ? "Veg" : "Non-veg"}
 											</Text>
 										</Pressable>
 									))}
@@ -584,7 +546,7 @@ export default function App() {
                     </View>
 				)}
 				{screen==="saved" && <View style={styles.section}>
-					<Text style={styles.eyebrow}>{publicDemo ? "SAVED IN THIS BROWSER" : "PERSISTED IN POSTGRESQL"}</Text>
+					<Text style={styles.eyebrow}>SAVED MENUS</Text>
 					<Text style={styles.heading}>Saved menus</Text>
 					{!saved.length ? (
 						<Text style={styles.small}>
@@ -604,7 +566,7 @@ export default function App() {
 											<Text style={styles.dishName}>{item.name}</Text>
 											<Text style={styles.small}>
 												{item.category} ·{" "}
-												{item.vegetarian ? "Vegetarian" : "Non-vegetarian"}
+												{item.vegetarian === null ? "Unspecified" : item.vegetarian ? "Vegetarian" : "Non-vegetarian"}
 											</Text>
 											{item.variants.map((v, j) => (
 												<Text key={j} style={styles.small}>

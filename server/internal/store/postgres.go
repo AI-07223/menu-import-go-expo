@@ -39,7 +39,7 @@ func (p *Postgres) Save(ctx context.Context, name string, d menu.Draft) (menu.Sa
 		if e != nil {
 			return menu.Saved{}, e
 		}
-		_, err = tx.Exec(ctx, "INSERT INTO menu_items(menu_id,position,category,name,price_minor,vegetarian,variants,photo) VALUES($1,$2,$3,$4,$5,$6,$7,$8)", id, i, strings.TrimSpace(item.Category), strings.TrimSpace(item.Name), *item.PriceMinor, *item.Vegetarian, encoded, item.Photo)
+		_, err = tx.Exec(ctx, "INSERT INTO menu_items(menu_id,position,category,name,price_minor,vegetarian,variants,photo) VALUES($1,$2,$3,$4,$5,$6,$7,$8)", id, i, strings.TrimSpace(item.Category), strings.TrimSpace(item.Name), *item.PriceMinor, item.Vegetarian, encoded, item.Photo)
 		if err != nil {
 			return menu.Saved{}, err
 		}

@@ -45,8 +45,8 @@ func TestSaveValidationRejectsUnresolvedAndInvalidVariants(t *testing.T) {
 		t.Fatal(err)
 	}
 	d.Items[0].Vegetarian = nil
-	if Validate("Menu", d) == nil {
-		t.Fatal("unknown flag saved")
+	if Validate("Menu", d) != nil {
+		t.Fatal("unknown dietary value should be accepted")
 	}
 	d.Items[0].Vegetarian = &flag
 	d.Items[0].Variants = []Variant{{Name: "Half"}}

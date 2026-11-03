@@ -41,6 +41,21 @@ func TestPostgresPersistenceAndRollback(t *testing.T) {
 	if err != nil || len(rows) != 1 || rows[0].ID != saved.ID || *rows[0].Items[0].PriceMinor != 1010 || *rows[0].Items[0].Vegetarian || len(rows[0].Items[0].Variants) != 1 {
 		t.Fatalf("roundtrip: %+v %v", rows, err)
 	}
+	// An unknown classification is preserved rather than guessed.
+	unknown := d
+	unknown.Items = append([]menu.Item(nil), d.Items...)
+	unknown.Items[0].Vegetarian = nil
+	stored, err := repo.Save(ctx, "Unknown dietary", unknown)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows, err = repo.List(ctx)
+	if err != nil || rows[0].ID != stored.ID || rows[0].Items[0].Vegetarian != nil {
+		t.Fatal("unknown dietary value not preserved")
+	}
+	if _, err = pool.Exec(ctx, "DELETE FROM menus WHERE id=$1", stored.ID); err != nil {
+		t.Fatal(err)
+	}
 	// The second dish violates the real database uniqueness constraint after the
 	// menu and first dish have been inserted. The entire new menu must roll back.
 	d.Items = append(d.Items, d.Items[0])

@@ -10,7 +10,7 @@ A model may still return a confident but wrong value. Null handling does not det
 
 ## Money
 
-`priceMinor` is an integer number of paise. Parsing accepts plain decimals with at most two fractional digits and never removes a minus sign or currency symbol. `10.10` becomes `1010`, without binary floating-point rounding. The sample supports only INR; adding currencies requires explicit currency metadata and different minor-unit rules, not just changing a label.
+`priceMinor` is an integer number of minor currency units. Parsing accepts plain decimals with at most two fractional digits and never removes a minus sign or currency symbol. `10.10` becomes `1010`, without binary floating-point rounding. The sample supports INR and USD, both with two minor-unit decimal places. A scan with ambiguous currency remains unknown until an operator selects it.
 
 ## Failures and atomicity
 

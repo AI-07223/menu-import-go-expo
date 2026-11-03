@@ -30,8 +30,9 @@ test("review preserves uncertainty, false and portion prices", () => {
 	const editable = editDraft(draft);
 	assert.equal(issues(editable), 1);
 	editable[0].price = "20.20";
-	editable[0].vegetarian = false;
 	assert.equal(issues(editable), 0);
+	assert.equal(reviewedItems(editable)[0].vegetarian, null);
+	editable[0].vegetarian = false;
 	assert.equal(reviewedItems(editable)[0].vegetarian, false);
 	assert.equal(reviewedItems(editable)[0].priceMinor, 2020);
 	assert.equal(reviewedItems(editable)[0].variants[0].priceMinor, 1010);

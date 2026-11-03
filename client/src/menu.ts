@@ -52,7 +52,6 @@ export function issues(items: EditableItem[]): number {
 		(item) =>
 			!item.name.trim() ||
 			!item.category.trim() ||
-			item.vegetarian === null ||
 			(parsePrice(item.price) ?? 0) <= 0 ||
 			item.variants.some(
 				(v) => !v.name.trim() || (parsePrice(v.price) ?? 0) <= 0,

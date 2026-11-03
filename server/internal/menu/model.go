@@ -47,9 +47,6 @@ func Validate(name string, d Draft) error {
 		if item.Photo != nil && (len(*item.Photo) > 350000 || CheckImage(*item.Photo) != nil) {
 			return fmt.Errorf("invalid photo for dish %d", i+1)
 		}
-		if item.Vegetarian == nil {
-			return fmt.Errorf("choose a dietary classification for dish %d", i+1)
-		}
 		if item.PriceMinor == nil || *item.PriceMinor <= 0 || *item.PriceMinor > 9999999 {
 			return fmt.Errorf("review the price of dish %d", i+1)
 		}

@@ -43,18 +43,18 @@ func TestAuthenticationAndDemo(t *testing.T) {
 		t.Fatal("demo wrote data")
 	}
 }
-func TestGraphQLRejectsUnknownDietaryBeforeStore(t *testing.T) {
+func TestGraphQLAcceptsUnknownDietary(t *testing.T) {
 	store := &memoryStore{}
 	h := Handler(&Resolver{Store: store}, testToken)
 	input := map[string]any{"name": "Menu", "currency": "INR", "items": []any{map[string]any{"name": "Rice", "category": "Food", "priceMinor": 5000, "vegetarian": nil, "variants": []any{}}}}
 	query := `mutation Save($input: ReviewedMenuInput!){saveMenu(input:$input){id}}`
 	w := call(t, h, query, map[string]any{"input": input}, testToken)
-	if !bytes.Contains(w.Body.Bytes(), []byte("dietary")) || store.calls != 0 {
+	if bytes.Contains(w.Body.Bytes(), []byte(`"errors"`)) || store.calls != 1 {
 		t.Fatal(w.Body.String())
 	}
 	input["items"].([]any)[0].(map[string]any)["vegetarian"] = false
 	w = call(t, h, query, map[string]any{"input": input}, testToken)
-	if bytes.Contains(w.Body.Bytes(), []byte(`"errors"`)) || store.calls != 1 {
+	if bytes.Contains(w.Body.Bytes(), []byte(`"errors"`)) || store.calls != 2 {
 		t.Fatal(w.Body.String())
 	}
 }
