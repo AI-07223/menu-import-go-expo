@@ -85,14 +85,18 @@ The Docker build runs the client checks too. Go unit tests can run without Postg
 
 | File | Responsibility |
 |---|---|
-| `server/internal/menu/normalize.go` | Strict output structure, three-state dietary labels, exact decimal-to-paise parsing |
+| `server/internal/menu/normalize.go` | Strict output structure, three-state dietary labels, exact decimal-to-minor-unit parsing |
 | `server/internal/menu/scanner.go` | Image bounds, request context, bounded retries and provider response validation |
 | `server/internal/api/schema.graphql` | Explicit API contract separating extraction from saving |
 | `server/internal/api/graphql.go` | GraphQL resolvers, operator token, request bounds, save validation |
 | `server/internal/store/postgres.go` | Transactional persistence and parameterized SQL |
 | `server/internal/store/postgres_test.go` | Actual PostgreSQL round trip and rollback proof |
 | `client/src/menu.ts` | Editable draft model and integer-price conversion |
-| `client/App.tsx` | Expo/React review interface and saved-menu view |
+| `client/App.tsx` | Coordinates scanning, review and saving |
+| `client/src/ImportScreen.tsx` | Import and recorded-demo entry points |
+| `client/src/DishEditor.tsx` | Editable dish fields and catalog suggestions |
+| `client/src/SavedMenus.tsx` | Saved menu display |
+| `client/src/controls.tsx` and `client/src/styles.ts` | Shared UI controls and styling |
 
 Prices use integer minor units for INR or USD. Dietary labels may remain unspecified. Save rejects invalid base prices and invalid portions; it does not silently discard them. Provider requests use one bounded retry for transient failures and respect the request context. Invalid model JSON or an incomplete response is rejected.
 

@@ -3,11 +3,16 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
 import {closestDish} from "../src/matching.ts";
-const entries = JSON.parse(readFileSync(new URL("../src/catalog.json", import.meta.url),"utf8"));
-test("each menu reference matches its source image bytes", () => {
-    for (const entry of entries) for (const image of entry.images) {
-        const bytes=readFileSync(new URL("../assets/"+image.file, import.meta.url));
-        assert.equal(createHash("sha256").update(bytes).digest("hex"),image.sha256);
+const runs = JSON.parse(readFileSync(new URL("../src/demo-runs.json", import.meta.url), "utf8"));
+test("recorded scans match all three source images and three models", () => {
+    const images = ["sample-clear.png", "citrus-window.png", "lunch-edition.jpg"];
+    const models = ["qwen/qwen3.7-flash", "google/gemini-2.5-flash-lite", "deepseek/deepseek-v4.1-flash"];
+    for (const image of images) {
+        const bytes = readFileSync(new URL("../assets/" + image, import.meta.url));
+        const sha256 = createHash("sha256").update(bytes).digest("hex");
+        for (const model of models) {
+            assert.equal(runs[image + "|" + model].imageSha256, sha256);
+        }
     }
 });
 test("suggest a close typo, abstain for ties and unrelated dishes", () => {

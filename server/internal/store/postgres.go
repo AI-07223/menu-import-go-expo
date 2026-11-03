@@ -6,9 +6,11 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"menu-review/internal/menu"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"menu-review/internal/menu"
 )
 
 //go:embed schema.sql

@@ -7,10 +7,12 @@ import (
 	_ "embed"
 	"encoding/json"
 	"errors"
-	graphql "github.com/graph-gophers/graphql-go"
-	"menu-review/internal/menu"
 	"net/http"
 	"time"
+
+	graphql "github.com/graph-gophers/graphql-go"
+
+	"menu-review/internal/menu"
 )
 
 //go:embed schema.graphql

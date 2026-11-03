@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
-	"menu-review/internal/api"
-	"menu-review/internal/menu"
-	"menu-review/internal/store"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"menu-review/internal/api"
+	"menu-review/internal/menu"
+	"menu-review/internal/store"
 )
 
 func env(name, fallback string) string {
@@ -42,7 +44,7 @@ func main() {
 	}
 	scanner := &menu.Scanner{Client: &http.Client{Timeout: 12 * time.Second}, RetryDelay: 300 * time.Millisecond}
 	if key := os.Getenv("OPENROUTER_API_KEY"); key != "" {
-		scanner.Providers = append(scanner.Providers, menu.Provider{Name: "OpenRouter", URL: "https://openrouter.ai/api/v1/chat/completions", Key: key, Model: env("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite")})
+		scanner.Providers = append(scanner.Providers, menu.Provider{URL: "https://openrouter.ai/api/v1/chat/completions", Key: key, Model: env("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite")})
 	}
 
 	mux := http.NewServeMux()

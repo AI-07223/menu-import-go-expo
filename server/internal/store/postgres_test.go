@@ -2,12 +2,14 @@ package store
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"menu-review/internal/menu"
 	"os"
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"menu-review/internal/menu"
 )
 
 func TestPostgresPersistenceAndRollback(t *testing.T) {
