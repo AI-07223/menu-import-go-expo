@@ -326,15 +326,15 @@ export default function App() {
 				keyboardShouldPersistTaps="handled"
 			>
 				<View style={styles.nav}>
-					<Text style={styles.brand}>◩  Menu Press</Text>
+					<Text style={styles.brand}>◩  Menu Import</Text>
 					<Text style={styles.small}>{screen==="upload"?"01 / Upload":screen==="review"?"02 / Verify":"03 / Menus"}</Text>
                 </View>
                 {screen!=="upload" && <Button secondary title="Back to uploads" disabled={busy} onPress={()=>{setMessage("");setScreen("upload")}} />}
                 {screen==="upload" && <>
                 <View style={styles.hero}>
                     <Text style={styles.eyebrow}>THE RESTAURANT WORKSPACE</Text>
-                    <Text style={styles.title}>From print to plate.</Text>
-                    <Text style={styles.subtitle}>Start with a menu photo. Check the dishes and prices, then save the menu.</Text>
+                    <Text style={styles.title}>Import your menu with confidence.</Text>
+                    <Text style={styles.subtitle}>Based on a menu import workflow in my Billing project, this sample combines AI extraction with a catalog of common dishes and images. It suggests close matches for misread names, then lets restaurant owners review and correct every detail before saving. Large menus become easier to import and verify.</Text>
                 </View>
                 {source ? <Button title="Continue verifying draft" onPress={()=>setScreen("review")} /> : null}
                 {!publicDemo && <View style={styles.access}>
@@ -357,17 +357,18 @@ export default function App() {
 				</View>}
 				<View style={styles.homeGrid}>
                 {[
-                    {number:"01 / IMPORT",title:"Use your own API",detail:"Scan a menu photo with Gemini on your server.",image:require("./public/kitchen/pepper-melt.jpg"),button:publicDemo?(setup?"Hide setup":"Set up my API"):"Upload menu photo"},
-                    {number:"02 / EXPLORE",title:"Recorded demos",detail:"Explore three menus, from simple print to illustrated specials.",image:require("./assets/citrus-window.png"),button:"Open menu demos"},
-                    {number:"03 / COLLECTION",title:"Saved menus",detail:publicDemo?"Reopen the menus you’ve saved in this browser.":"Browse the menus saved to your restaurant.",image:require("./public/kitchen/berry-cheesecake.jpg"),button:"View saved menus"}
+                    {number:"01 / IMPORT",title:"Use your own API",detail:"Scan a menu photo with Gemini on your server.",image:require("./assets/home-scan.png"),button:publicDemo?(setup?"Hide setup":"Set up my API"):"Upload menu photo"},
+                    {number:"02 / EXPLORE",title:"Recorded demos",detail:"Explore three menus, from simple print to illustrated specials.",image:require("./assets/home-compare.png"),button:"Open menu demos"},
+                    {number:"03 / COLLECTION",title:"Saved menus",detail:publicDemo?"Reopen the menus you’ve saved in this browser.":"Browse the menus saved to your restaurant.",image:require("./assets/home-saved.png"),button:"View saved menus"}
                 ].map((card,i)=><View key={card.number} testID="home-card" style={styles.homeCard}>
                     <Image source={card.image} accessibilityLabel={card.title+" cover"} resizeMode="cover" style={styles.cover}/>
                     <View style={styles.cardBody}><Text style={styles.eyebrow}>{card.number}</Text><Text style={styles.cardTitle}>{card.title}</Text>
                     <Text style={[styles.small,{flex:1}]}>{card.detail}</Text>
+                    {i===0 && publicDemo && setup && <Text style={styles.small}>Copy .env.example to .env, set OPENROUTER_API_KEY, and start the server. {Platform.OS==="web" && <a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Open setup guide ↗</a>}</Text>}
                     <Button title={card.button} onPress={()=>{if(i===0){if(publicDemo)setSetup(!setup);else selectPhoto()}else if(i===1)openExample(0);else void action(async()=>{await refresh();setScreen("saved")})}} disabled={busy||(!publicDemo&&!token&&i!==1)} /></View>
                 </View>)}
                 </View>
-                {publicDemo && setup && <View style={styles.notice}><Text>Copy .env.example to .env, set OPENROUTER_API_KEY, and start the server. {Platform.OS==="web" && <a href="https://github.com/AI-07223/menu-review-go-expo#configure-live-scanning">Open setup guide ↗</a>}</Text></View>}
+
                 </>}
                 {busy && (
 					<Text accessibilityLiveRegion="polite" style={styles.notice}>
@@ -621,14 +622,14 @@ export default function App() {
 					)}
 				</View>}
 				
-			<View style={styles.imprint}><Text style={styles.brand}>Menu Press</Text><Text style={styles.small}>Restaurant menu studio  /  Zaid Qureshi</Text></View>
+			<View style={styles.imprint}><Text style={styles.brand}>Menu Import</Text><Text style={styles.small}>Restaurant menu studio  /  Zaid Qureshi</Text></View>
             </ScrollView>
 		</>
 	);
 }
 const styles = StyleSheet.create({
 	homeGrid:{flexDirection:"row",flexWrap:"wrap",gap:16,justifyContent:"center"},
-    homeCard:{height:355,width:"100%",maxWidth:312,borderWidth:1,borderColor:"#d7c9ba",borderRadius:18,overflow:"hidden",backgroundColor:"#fffaf3"},
+    homeCard:{minHeight:355,width:"100%",flexBasis:280,flexGrow:1,maxWidth:480,borderWidth:1,borderColor:"#d7c9ba",borderRadius:18,backgroundColor:"#fffaf3"},
     cardBody:{flex:1,padding:17,gap:5},cardTitle:{fontFamily:"serif",fontWeight:"700",fontSize:27,color:"#35251b"},
     cover:{width:"100%",height:160,backgroundColor:"#f7ebd6"},
     imprint:{marginTop:36,paddingVertical:20,borderTopWidth:2,borderColor:"#a64c17",flexDirection:"row",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8},
