@@ -2,7 +2,7 @@
 
 A restaurant owner can turn a menu photo into an editable draft, check it against the original, and save the reviewed dishes together. This is a focused, AI-assisted reimplementation of a menu-import workflow from my Billing project.
 
-**[Open the hosted demo](https://menu-review.smartmade.site/)** → **Open menu demos**. Choose a photo and a model to inspect its recorded output. The public demo allows anonymous replay. Live scanning and saving require a configured server and operator token, as described below.
+**[Open the hosted demo](https://menu-review.smartmade.site/)** → **Open menu demos**. Choose a photo and a model to inspect its recorded output. Recorded menus can be edited and saved in the same browser without a token. Those demo saves stay on that browser and device. Live scanning and restaurant database saves require a configured server and operator token, as described below.
 
 ## Why this project
 

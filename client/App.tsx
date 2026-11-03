@@ -15,6 +15,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { fields, request } from "./src/api";
+import { readDemoMenus, saveDemoMenu } from "./src/demoStorage";
 import {
 	Draft,
 	EditableItem,
@@ -127,6 +128,7 @@ export default function App() {
 	const [screen,setScreen]=useState<"upload"|"review"|"saved">("upload");
     const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
+    const [demoSaved, setDemoSaved] = useState<SavedMenu[]>([]);
 	const [model,setModel]=useState("google/gemini-2.5-flash-lite");
     const [sample,setSample]=useState(0);
     useEffect(()=>{
@@ -165,6 +167,11 @@ export default function App() {
 		);
 	}
 	async function refresh() {
+        if (Platform.OS === "web") setDemoSaved(readDemoMenus(window.localStorage));
+        if (!token) {
+            setSaved([]);
+            return;
+        }
 		const data = await request<{ menus: SavedMenu[] }>(
 			baseURL,
 			token,
@@ -291,6 +298,19 @@ export default function App() {
 				throw new Error(
 					"Resolve every highlighted dish and enter a menu name before saving.",
 				);
+            if (isSample && !token) {
+                if (Platform.OS !== "web") throw new Error("Demo saving is available in the web browser. Configure a server token to save on this device.");
+                const menu: SavedMenu = {id: crypto.randomUUID(), name:name.trim(), currency, items:reviewedItems(items)};
+                try {
+                    setDemoSaved(saveDemoMenu(window.localStorage, menu));
+                } catch {
+                    throw new Error("Could not save this demo in your browser. Your draft is still here.");
+                }
+                delete sampleDrafts.current[examples[sample].file+"|"+model];
+                setItems([]); setSource(""); setPhoto(null); setScreen("saved");
+                setMessage("Demo saved in this browser only.");
+                return;
+            }
             const data = await request<{ saveMenu: SavedMenu }>(
 				baseURL,
 				token,
@@ -379,7 +399,7 @@ export default function App() {
                         </View>
                     </View>
                 </View>
-                <Button secondary title="View saved menus" disabled={busy || !token} onPress={() => void action(async () => {await refresh();setScreen("saved");})} />
+                <Button secondary title="View saved menus" disabled={busy} onPress={() => void action(async () => {setScreen("saved");await refresh();})} />
 
                 </>}
                 {busy && (
@@ -591,7 +611,7 @@ export default function App() {
 						);})}
 						<Button secondary disabled={busy} title="Add another dish" onPress={addDish} />
                         <Button
-							title={busy?"Saving…":"Save this menu"}
+							title={busy?"Saving…":isSample && !token?"Save demo in this browser":"Save this menu"}
 							onPress={save}
 							disabled={busy}
 						/>
@@ -601,14 +621,16 @@ export default function App() {
 				{screen==="saved" && <View style={styles.section}>
 					<Text style={styles.eyebrow}>SAVED MENUS</Text>
 					<Text style={styles.heading}>Saved menus</Text>
-					{!saved.length ? (
+                    <Text style={styles.small}>Demo saves stay in this browser. Restaurant menus require an operator token.</Text>
+                    {!saved.length && !demoSaved.length ? (
 						<Text style={styles.small}>
 							Your verified menus will appear here after you save your first import.
 						</Text>
 					) : (
-						saved.map((entry) => (
+                        [...demoSaved.map(entry => ({entry, origin:"Demo · this browser"})), ...saved.map(entry => ({entry, origin:"Restaurant · server"}))].map(({entry, origin}) => (
 							<View key={entry.id} style={styles.card}>
 								<Text style={styles.menuName}>{entry.name}</Text>
+                                <Text style={styles.small}>{origin}</Text>
 								<Text style={styles.small}>
 									{entry.items.length} dishes · {entry.currency}
 								</Text>
