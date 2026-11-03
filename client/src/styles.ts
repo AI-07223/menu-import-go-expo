@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
   },
   screen: { flex: 1, backgroundColor: "#faf9f7" },
   page: {
-    maxWidth: 1050,
+    maxWidth: 1440,
     width: "100%",
     alignSelf: "center",
     paddingHorizontal: 24,
@@ -92,7 +92,13 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 16,
   },
+  dishGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginTop: 20 },
+  actions: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 24 },
+  menuSettings: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 24 },
   button: {
+    alignSelf: "flex-start",
+    maxWidth: "100%",
+    marginVertical: 3,
     backgroundColor: "#b64a00",
     paddingVertical: 14,
     paddingHorizontal: 20,

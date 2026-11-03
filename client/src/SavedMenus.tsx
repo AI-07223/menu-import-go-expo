@@ -3,6 +3,7 @@ import { priceText, type SavedMenu } from "./menu";
 import { styles } from "./styles";
 
 type Props = {
+  dishWidth: "32%" | "49%" | "100%";
   saved: SavedMenu[];
   demoSaved: SavedMenu[];
   artwork: (item: {
@@ -11,7 +12,7 @@ type Props = {
   }) => ImageSourcePropType | undefined;
 };
 
-export function SavedMenus({ saved, demoSaved, artwork }: Props) {
+export function SavedMenus({ saved, demoSaved, artwork, dishWidth }: Props) {
   return (
     <View style={styles.section}>
       <Text style={styles.eyebrow}>SAVED MENUS</Text>
@@ -38,8 +39,9 @@ export function SavedMenus({ saved, demoSaved, artwork }: Props) {
             <Text style={styles.small}>
               {entry.items.length} dishes · {entry.currency}
             </Text>
+            <View style={styles.dishGrid}>
             {entry.items.map((item, i) => (
-              <View key={i} style={styles.savedRow}>
+              <View key={i} style={[styles.savedRow, { width: dishWidth, flexWrap: "wrap" }]}>
                 {artwork(item) && (
                   <Image
                     source={artwork(item)}
@@ -68,6 +70,7 @@ export function SavedMenus({ saved, demoSaved, artwork }: Props) {
                 </Text>
               </View>
             ))}
+            </View>
           </View>
         ))
       )}

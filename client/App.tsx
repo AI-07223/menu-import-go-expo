@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import {
   Alert,
+  useWindowDimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -50,6 +51,9 @@ const baseURL =
   process.env.EXPO_PUBLIC_API_URL ??
   (Platform.OS === "web" ? "" : "http://localhost:8780");
 export default function App() {
+  const { width } = useWindowDimensions();
+  const columns = width >= 1180 ? 3 : width >= 780 ? 2 : 1;
+  const dishWidth = columns === 3 ? "32%" : columns === 2 ? "49%" : "100%";
   const [token, setToken] = useState("");
   const [items, setItems] = useState<EditableItem[]>([]);
   const [name, setName] = useState("My restaurant menu");
@@ -360,7 +364,7 @@ export default function App() {
       <ScrollView
         key={screen}
         style={styles.screen}
-        contentContainerStyle={styles.page}
+        contentContainerStyle={[styles.page, width < 480 && { paddingHorizontal: 16 }]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.nav}>
@@ -448,7 +452,7 @@ export default function App() {
                     style={{ height: 220, marginTop: 16 }}
                   />
                 )}
-                <View style={{ marginTop: 16, gap: 8 }}>
+                <View style={styles.menuSettings}>
                   <Text style={styles.label}>
                     Menu currency ·{" "}
                     {currency === "UNKNOWN" ? "Choose currency" : currency}
@@ -475,7 +479,9 @@ export default function App() {
                   onChangeText={setName}
                   maxLength={120}
                 />
+                <View style={styles.dishGrid}>
                 {items.map((item, index) => (
+                  <View key={index} style={{ width: dishWidth }}>
                   <DishEditor
                     key={index}
                     item={item}
@@ -492,7 +498,10 @@ export default function App() {
                       )
                     }
                   />
+                  </View>
                 ))}
+                </View>
+                <View style={styles.actions}>
                 <Button
                   secondary
                   disabled={busy}
@@ -510,12 +519,13 @@ export default function App() {
                   onPress={save}
                   disabled={busy}
                 />
+                </View>
               </>
             )}
           </View>
         )}
         {screen === "saved" && (
-          <SavedMenus saved={saved} demoSaved={demoSaved} artwork={artwork} />
+          <SavedMenus saved={saved} demoSaved={demoSaved} artwork={artwork} dishWidth={dishWidth} />
         )}
 
         <View style={styles.imprint}>

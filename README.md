@@ -120,7 +120,7 @@ For native development, set `EXPO_PUBLIC_API_URL` to a backend reachable from th
 
 The Expo build dependencies pin `minimatch` 11.0.1 and `glob` 14.0.2 via explicit overrides to address an npm audit advisory. Validate checks and web export when changing these overrides.
 
-See [design](docs/DESIGN.md), [verification](docs/VERIFICATION.md), and [GCP deployment](docs/GCP.md).
+See [architecture and developer handoff](ARCHITECTURE.md), [design notes](docs/DESIGN.md), [verification](docs/VERIFICATION.md), and [GCP deployment](docs/GCP.md).
 
 ## AI assistance and source
 
