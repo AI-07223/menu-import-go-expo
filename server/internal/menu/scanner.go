@@ -20,7 +20,6 @@ const Prompt = `Read the menu image. Return only JSON: {"currency":"UNKNOWN","ca
 
 type Provider struct {
 	Name, URL, Key, Model string
-	Mistral               bool
 }
 type Scanner struct {
 	Client     *http.Client
@@ -80,11 +79,17 @@ func (s *Scanner) Scan(ctx context.Context, uri string) (Draft, error) {
 	return Draft{}, errors.New("configured vision providers could not produce a valid draft")
 }
 func (s *Scanner) request(ctx context.Context, p Provider, uri string) (string, bool, error) {
-	var imageURL any = map[string]string{"url": uri}
-	if p.Mistral {
-		imageURL = uri
+	payload := map[string]any{
+		"model":       p.Model,
+		"temperature": 0,
+		"messages": []any{map[string]any{
+			"role": "user",
+			"content": []any{
+				map[string]any{"type": "text", "text": Prompt},
+				map[string]any{"type": "image_url", "image_url": map[string]string{"url": uri}},
+			},
+		}},
 	}
-	payload := map[string]any{"model": p.Model, "temperature": 0, "messages": []any{map[string]any{"role": "user", "content": []any{map[string]any{"type": "text", "text": Prompt}, map[string]any{"type": "image_url", "image_url": imageURL}}}}}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return "", false, err

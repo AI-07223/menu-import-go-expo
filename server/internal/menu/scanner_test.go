@@ -28,7 +28,7 @@ func TestMalformedProviderFallsBack(t *testing.T) {
 	defer a.Close()
 	b := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { second++; reply(w, `{"categories":[]}`) }))
 	defer b.Close()
-	scanner := Scanner{Client: a.Client(), Providers: []Provider{{URL: a.URL}, {URL: b.URL, Mistral: true}}}
+	scanner := Scanner{Client: a.Client(), Providers: []Provider{{URL: a.URL}, {URL: b.URL}}}
 	if _, err := scanner.Scan(context.Background(), testImage()); err != nil {
 		t.Fatal(err)
 	}

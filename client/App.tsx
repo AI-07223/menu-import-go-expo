@@ -1,6 +1,7 @@
 import recordings from "./src/demo-runs.json";
 import { useRef, useState, useEffect } from "react";
 import {
+	Alert,
 	Platform,
 	Pressable,
 	ScrollView,
@@ -9,6 +10,7 @@ import {
 	TextInput,
 	View,
 	Image,
+    ImageSourcePropType,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
@@ -30,6 +32,18 @@ import citrus from "./src/citrus.json";
 import lunch from "./src/lunch.json";
 import recorded from "./src/recorded.json";
 
+const catalogImages: Record<string, ImageSourcePropType> = {
+    "/kitchen/charred-corn.jpg": require("./public/kitchen/charred-corn.jpg"),
+    "/kitchen/pepper-melt.jpg": require("./public/kitchen/pepper-melt.jpg"),
+    "/kitchen/lime-chicken.jpg": require("./public/kitchen/lime-chicken.jpg"),
+    "/kitchen/ginger-soda.jpg": require("./public/kitchen/ginger-soda.jpg"),
+    "/kitchen/cherry-fizz.jpg": require("./public/kitchen/cherry-fizz.jpg"),
+    "/kitchen/cold-brew.jpg": require("./public/kitchen/cold-brew.jpg"),
+    "/kitchen/margherita-slice.jpg": require("./public/kitchen/margherita-slice.jpg"),
+    "/kitchen/french-fries.jpg": require("./public/kitchen/french-fries.jpg"),
+    "/kitchen/chocolate-donut.jpg": require("./public/kitchen/chocolate-donut.jpg"),
+    "/kitchen/berry-cheesecake.jpg": require("./public/kitchen/berry-cheesecake.jpg"),
+};
 const models = [
     {id:"reference",name:"Reference transcription"},
     {id:"qwen/qwen3.7-flash",name:"Qwen 3.7 Flash"},
@@ -176,10 +190,13 @@ export default function App() {
         setName(savedDraft?.name ?? example.name);
         setPhoto(null); setSource("SAMPLE MENU"); setScreen("review"); setError(""); setMessage("");
     }
-    function artwork(item: {name:string; photo?:string|null}) {
-        if (item.photo) return item.photo;
+    function artwork(item: {name:string; photo?:string|null}): ImageSourcePropType | undefined {
+        if (item.photo) return {uri:item.photo};
         const normalize = (name:string) => name.trim().toLowerCase().replace(/\s+/g, " ");
-        return house.find(row => normalize(row.name) === normalize(item.name))?.image;
+        const match = house.find(row => normalize(row.name) === normalize(item.name));
+        if (!match) return undefined;
+
+        return catalogImages[match.image];
     }
     function addDish() {
         setItems(current => [...current, {name:"", category:"Menu", price:"", vegetarian:null, variants:[]}]);
@@ -206,7 +223,32 @@ export default function App() {
             change(index,{photo:uri});
         });
     }
-    function selectPhoto() { scan(); }
+    function discardDraft() {
+        const discard = () => {
+            setItems([]);
+            setSource("");
+            setPhoto(null);
+            setName("My restaurant menu");
+            setCurrency("INR");
+            sampleDrafts.current = {};
+        };
+        if (Platform.OS === "web") {
+            if (window.confirm("Discard your current draft? This cannot be undone.")) discard();
+        } else {
+            Alert.alert("Discard draft?", "Your current changes will be lost.", [
+                {text:"Keep draft",style:"cancel"},
+                {text:"Discard",style:"destructive",onPress:discard},
+            ]);
+        }
+    }
+
+    function selectPhoto() {
+        if (source) {
+            setError("Finish or discard your current draft before importing another menu.");
+            return;
+        }
+        scan();
+    }
 
     function scan() {
 		void action(async () => {
@@ -230,7 +272,8 @@ export default function App() {
 				`mutation Scan($image: String!) { scanMenu(image: $image) { ${fields} } }`,
 				{ image: `data:${asset.mimeType};base64,${asset.base64}` },
 			);
-			setCurrency(data.scanMenu.currency);
+			setName("My restaurant menu");
+            setCurrency(data.scanMenu.currency);
             setPhoto(asset.uri);
 			setScreen("review"); setItems(editDraft(data.scanMenu));
 			setSource("LIVE EXTRACTION · REVIEW REQUIRED");
@@ -264,7 +307,10 @@ export default function App() {
 				data.saveMenu,
 				...current.filter((m) => m.id !== data.saveMenu.id),
 			]);
-			setItems([]); setSource(""); setScreen("saved");
+			if (source === "SAMPLE MENU") {
+                delete sampleDrafts.current[examples[sample].file+"|"+model];
+            }
+            setItems([]); setSource(""); setPhoto(null); setScreen("saved");
 			setMessage(
 				`Saved ${data.saveMenu.items.length} dishes to PostgreSQL. Reload saved menus to verify persistence.`,
 			);
@@ -293,7 +339,10 @@ export default function App() {
                     <Text style={styles.title}>Import your menu with confidence.</Text>
                     <Text style={styles.subtitle}>Based on a menu import workflow in my Billing project, this sample combines AI extraction with a catalog of common dishes and images. It suggests close matches for misread names, then lets restaurant owners review and correct every detail before saving. Large menus become easier to import and verify.</Text>
                 </View>
-                {source ? <Button title="Continue verifying draft" onPress={()=>setScreen("review")} /> : null}
+                {source ? <View style={{gap:8}}>
+                    <Button title="Continue verifying draft" onPress={()=>setScreen("review")} />
+                    <Button secondary title="Discard draft" disabled={busy} onPress={discardDraft} />
+                </View> : null}
                 {<View style={styles.access}>
 					<View style={{ flex: 1, minWidth: 180 }}>
 						<Text style={styles.label}>Operator token</Text>
@@ -372,7 +421,11 @@ export default function App() {
 								style={{ height: 220, marginTop: 16 }}
 							/>
 						)}
-						{currency === "UNKNOWN" && <View><Text style={styles.label}>Which currency is printed on this menu?</Text><Button title="Indian rupees (INR)" onPress={() => setCurrency("INR")} /><Button title="US dollars (USD)" onPress={() => setCurrency("USD")} /></View>}
+						<View style={{marginTop:16, gap:8}}>
+                            <Text style={styles.label}>Menu currency · {currency === "UNKNOWN" ? "Choose currency" : currency}</Text>
+                            <Button title="Indian rupees (INR)" secondary={currency !== "INR"} disabled={busy} onPress={() => setCurrency("INR")} />
+                            <Button title="US dollars (USD)" secondary={currency !== "USD"} disabled={busy} onPress={() => setCurrency("USD")} />
+                        </View>
                         <Text style={[styles.label, { marginTop: 20 }]}>Menu name</Text>
 						<TextInput
 							editable={!busy}
@@ -396,7 +449,7 @@ export default function App() {
 								]}
 							>
 								<View style={{flexDirection:"row",alignItems:"center",gap:14,marginBottom:12}}>
-                                    {artwork(item) && <Image source={{uri:artwork(item)}} accessibilityLabel={item.photo ? "Uploaded dish photo" : "Catalog illustration of "+item.name} resizeMode="cover" style={{width:100,height:76,borderRadius:10}} />}
+                                    {artwork(item) && <Image source={artwork(item)} accessibilityLabel={item.photo ? "Uploaded dish photo" : "Catalog illustration of "+item.name} resizeMode="cover" style={{width:100,height:76,borderRadius:10}} />}
                                     <View style={{flex:1}}><Text style={styles.menuName}>{item.name || "New dish"}</Text>
                                     <Text style={styles.small}>{item.photo ? "Your dish photo" : artwork(item) ? "Catalog illustration" : "Photo optional"}</Text></View>
                                 </View>
@@ -561,7 +614,7 @@ export default function App() {
 								</Text>
 								{entry.items.map((item, i) => (
 									<View key={i} style={styles.savedRow}>
-                                        {artwork(item) && <Image source={{uri:artwork(item)}} accessibilityLabel={"Photo for "+item.name} style={{width:72,height:56,borderRadius:8}} />}
+                                        {artwork(item) && <Image source={artwork(item)} accessibilityLabel={"Photo for "+item.name} style={{width:72,height:56,borderRadius:8}} />}
 										<View style={{ flex: 1 }}>
 											<Text style={styles.dishName}>{item.name}</Text>
 											<Text style={styles.small}>
@@ -650,13 +703,6 @@ const styles = StyleSheet.create({
 		flexWrap: "wrap",
 		gap: 16,
 	},
-	actions: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		gap: 10,
-		marginTop: 18,
-		marginBottom: 12,
-	},
 	button: {
 		backgroundColor: "#b64a00",
 		paddingVertical: 14,
@@ -682,14 +728,6 @@ const styles = StyleSheet.create({
 		backgroundColor: "#fff0df",
 		borderRadius: 8,
 		color: "#743400",
-		marginTop: 16,
-		lineHeight: 21,
-	},
-	error: {
-		padding: 14,
-		backgroundColor: "#fae5de",
-		color: "#8a3021",
-		borderRadius: 8,
 		marginTop: 16,
 		lineHeight: 21,
 	},
@@ -724,7 +762,6 @@ const styles = StyleSheet.create({
 		marginTop: 16,
 		marginBottom: 8,
 	},
-	needsAttention: { borderColor: "#bd7547", backgroundColor: "#fff7e9" },
 	fields: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 10 },
 	field: { flex: 1, minWidth: 140 },
 	stepper: {flexDirection:"row", alignItems:"center", gap:4},
@@ -755,5 +792,4 @@ const styles = StyleSheet.create({
 		paddingTop: 14,
 	},
 	dishName: { fontSize: 14, fontWeight: "600", color: "#2d2b29" },
-	footer: { marginTop: 36, fontSize: 11, color: "#686461", lineHeight: 18 },
 });

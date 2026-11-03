@@ -6,6 +6,7 @@ import (
 	"menu-review/internal/menu"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -69,5 +70,36 @@ func TestPostgresPersistenceAndRollback(t *testing.T) {
 	var count int
 	if err := pool.QueryRow(ctx, "SELECT count(*) FROM menu_items").Scan(&count); err != nil || count != 1 {
 		t.Fatal("partial dish escaped rollback")
+	}
+}
+
+// Concurrent startups must not race while applying the shared schema.
+func TestConcurrentMigrate(t *testing.T) {
+	url := os.Getenv("TEST_DATABASE_URL")
+	if url == "" {
+		t.Skip("TEST_DATABASE_URL unset")
+	}
+	ctx := context.Background()
+	pool, err := pgxpool.New(ctx, url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	if !strings.HasSuffix(pool.Config().ConnConfig.Database, "_test") {
+		t.Fatal("integration tests require a database ending _test")
+	}
+	repo := &Postgres{pool}
+	var group sync.WaitGroup
+	errors := make(chan error, 4)
+	for range 4 {
+		group.Add(1)
+		go func() { defer group.Done(); errors <- repo.Migrate(ctx) }()
+	}
+	group.Wait()
+	close(errors)
+	for err := range errors {
+		if err != nil {
+			t.Errorf("concurrent migration: %v", err)
+		}
 	}
 }

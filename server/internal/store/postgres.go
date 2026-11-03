@@ -16,7 +16,21 @@ var schema string
 
 type Postgres struct{ Pool *pgxpool.Pool }
 
-func (p *Postgres) Migrate(ctx context.Context) error { _, err := p.Pool.Exec(ctx, schema); return err }
+// Migrate serializes startup schema changes across app instances.
+func (p *Postgres) Migrate(ctx context.Context) error {
+	tx, err := p.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(context.Background())
+	if _, err = tx.Exec(ctx, "SELECT pg_advisory_xact_lock(69456201)"); err != nil {
+		return err
+	}
+	if _, err = tx.Exec(ctx, schema); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
 func (p *Postgres) Save(ctx context.Context, name string, d menu.Draft) (menu.Saved, error) {
 	if err := menu.Validate(name, d); err != nil {
 		return menu.Saved{}, err
