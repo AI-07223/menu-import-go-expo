@@ -1,16 +1,41 @@
 # Menu Review — Go / GraphQL / Expo / PostgreSQL
 
-A restaurant owner can turn a photographed menu into an editable draft, compare it with the original, and save the reviewed dishes together. The Go service treats model output as untrusted. The catalog supplies artwork and optional name suggestions while the restaurant keeps its own prices.
+A restaurant owner can turn a menu photo into an editable draft, check it against the original, and save the reviewed dishes together. This is a focused, AI-assisted reimplementation of a menu-import workflow from my Billing project.
 
-[Try the hosted demo](https://menu-review.smartmade.site/) and choose **Open menu demos**. Change the price of a familiar dish, then add one outside the catalog. Both appear in the saved menu. Recorded demos are available without credentials. Live scanning and saving require a configured server and operator token. Both environments use the same Go, GraphQL, PostgreSQL and Expo application. This is an AI-assisted reimplementation of an existing workflow.
+**[Open the hosted demo](https://menu-review.smartmade.site/)** → **Open menu demos**. Choose a photo and a model to inspect its recorded output. The public demo allows anonymous replay. Live scanning and saving require a configured server and operator token, as described below.
 
-## Compare recorded scans
+## Why this project
 
-Choose a reference photo, then switch between Gemini 2.5 Flash-Lite, Qwen 3.7 Flash and DeepSeek V4.1 Flash. Each pairing replays one actual OpenRouter response. Expand **Original model response** to inspect it. The separate reference transcription is available for comparison.
+My longer-term goal is restaurant software where an owner can use voice to record incoming stock or enter a table order, with the relevant information reaching the kitchen and cashier. AI would reduce manual entry while people verify important details. This sample explores one step toward that idea: extracting a menu from a photo and letting the owner correct it before saving.
 
-Across these three example photos (6, 6 and 22 dishes), each model matched all 34 reference name/price pairs, ignoring case and surrounding whitespace. This check covers printed names and prices only. OpenRouter reported $0.001571 in total for the nine calls. Replaying a result incurs no provider charge.
+Voice control, inventory updates, kitchen routing and cashier integration are future ideas. They are not implemented in this sample.
 
-The [recordings](client/src/demo-runs.json) include the input file hash, returned model, timestamp, usage, original text and normalized draft. The [recorder](server/cmd/record-demos/main.go) uses the application scanner prompt, temperature 0, a 2,500-token output limit and disabled reasoning in the request. From the server directory run `go run ./cmd/record-demos` with OPENROUTER_API_KEY in the environment. Existing recordings with matching image hashes are skipped.
+## How it works
+
+1. A Go server sends a PNG or JPEG to the configured vision provider. Recorded examples can also be replayed without an API key.
+2. The server checks the response structure, keeps unreadable prices and dietary labels unresolved, and rejects incomplete responses.
+3. The owner reviews the draft, can correct prices and portions, and can accept a close name suggestion or add a dish the model missed. A small catalog provides illustrations for matching dish names; it does not replace restaurant prices.
+4. The reviewed menu is saved to PostgreSQL in a transaction. A test forces a failure during item insertion and checks that the menu rolls back.
+
+Prices are integer minor units for INR or USD. Ambiguous currency requires confirmation. A model confidence percentage is its self-assessment, not a calibrated probability of correctness.
+
+## Recorded model results
+
+Three synthetic menu images were scanned once each with three models through OpenRouter. The table counts matching **dish-name and price pairs**, ignoring name case and surrounding whitespace. It does not score categories, dietary labels, confidence, latency or real-world accuracy.
+
+| Model | Simple menu | Illustrated menu | Two-column menu | Total |
+|---|---:|---:|---:|---:|
+| Qwen 3.7 Flash | 6/6 | 6/6 | 22/22 | 34/34 |
+| Gemini 2.5 Flash-Lite | 6/6 | 6/6 | 22/22 | 34/34 |
+| DeepSeek V4.1 Flash | 6/6 | 6/6 | 22/22 | 34/34 |
+
+**Dietary labels need particular care.** The illustrated and two-column menus contain no printed dietary labels, yet some models supplied them despite being instructed to leave them unspecified. A valid-looking AI result is not proof that the source supports it. The owner must check the original image.
+
+The [recordings](client/src/demo-runs.json) contain the image hash, model, time, original response, normalized draft and reported usage. The nine calls cost $0.001571 in total according to OpenRouter. The request used temperature 0, a 2,500-token output limit and asked for reasoning to be disabled. The original prompt was not stored with each run and the current prompt has since changed; the [recorder](server/cmd/record-demos/main.go) runs the current prompt.
+
+## Relationship to Billing
+
+Billing already has owner-reviewed menu import, multi-photo handling, provider fallback and a transactional import into a restaurant's actual menu. This repository does not integrate with Billing or replace those features. It reimplements a narrower workflow using Go, GraphQL, PostgreSQL, TypeScript, React and Expo, and adds integer minor-unit prices, currency review, catalog suggestions and a public comparison of recorded model outputs. It currently handles one photo per scan.
 
 ## Run the complete application
 
@@ -83,7 +108,7 @@ For native development, set `EXPO_PUBLIC_API_URL` to a backend reachable from th
 
 This is a single-operator sample, not a multi-tenant service. There is no user registration, fine-grained authorization, rate limiting, server-side save idempotency, durable extraction queue, or edit/delete workflow. Each successful save creates a new menu; list returns the latest 20. Duplicate dish names within the same case-sensitive category cause an atomic save failure rather than silent merging. Reload saved menus after a timeout before retrying a save.
 
-The database schema is bootstrapped at startup for a small demo; production would use versioned migrations, a restricted database role and a separate migration step. Native-device testing, live evaluation of the new Go adapter and GCP deployment remain distinct checks. The old PHP sample's four-image results are **not** attributed to this implementation.
+The database schema is bootstrapped at startup for a small demo; production would use versioned migrations, a restricted database role and a separate migration step. Native-device testing and GCP deployment remain unverified. A local live Go scan returned 22 items after an earlier attempt failed; this does not establish reliability. The old PHP sample's four-image results are **not** attributed to this implementation.
 
 The Expo build dependencies pin `minimatch` 11.0.1 and `glob` 14.0.2 via explicit overrides to address the advisory returned by npm audit; validate type checks, tests and web export when changing these overrides. It is not needed in the final Go/static-web runtime image.
 

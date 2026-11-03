@@ -14,7 +14,7 @@ A model may still return a confident but wrong value. Null handling does not det
 
 ## Failures and atomicity
 
-Transport failures, 429 and 5xx may retry once per configured provider; malformed output moves directly to the next provider. The server request has a 45-second context and individual HTTP calls have 12-second timeouts. The context bounds the combined chain.
+Transport failures, 429 and 5xx may retry once. Malformed output is rejected. The application configures OpenRouter as its only provider. The server request has a 45-second context and individual HTTP calls have 12-second timeouts. The context bounds the combined chain.
 
 The save transaction inserts a menu and all dishes. A real integration test makes the second dish violate a uniqueness constraint, then checks neither the parent nor first child escaped rollback. This proves the tested atomicity condition, not exactly-once behavior across repeated requests.
 

@@ -1,3 +1,5 @@
+> Historical verification snapshot from November 1–2, 2026. Current behavior and recorded model results are described in the [README](../README.md).
+
 # Verification record
 
 Verified locally on 1–2 November 2026. No application submission or cloud deployment was performed.
