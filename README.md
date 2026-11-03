@@ -104,13 +104,17 @@ Prices use integer minor units for INR or USD. Dietary labels may remain unspeci
 
 For native development, set `EXPO_PUBLIC_API_URL` to a backend reachable from the device before starting Expo; `localhost` on a phone refers to that phone. Use TLS and proper access controls for shared environments. This repository does not provision those environments.
 
-## Deliberate limits
+## Limitations
 
-This is a single-operator sample, not a multi-tenant service. There is no user registration, fine-grained authorization, rate limiting, server-side save idempotency, durable extraction queue, or edit/delete workflow. Each successful save creates a new menu; list returns the latest 20. Duplicate dish names within the same case-sensitive category cause an atomic save failure rather than silent merging. Reload saved menus after a timeout before retrying a save.
+- **One photo at a time.** Live scans accept a single JPEG or PNG. PDF and multi-page imports are not implemented in this sample.
+- **AI output requires review.** A model can omit a dish, misread a valid-looking price, or infer a dietary label that is not printed. Confidence scores are model self-assessments, not measured probabilities. The recorded tests cover only three synthetic menus.
+- **Single-operator access.** Live scanning and restaurant saves use one operator token. There is no restaurant login, multi-tenant isolation or rate limiting. Browser-saved recorded demos stay on that device and are subject to browser storage limits.
+- **Retrying a save can create a duplicate.** A timeout can occur after the database commits. Check saved menus before retrying. The app does not yet offer an idempotency key.
+- **Large photo collections can exceed the request limit.** Each dish photo is capped at 350,000 characters and the whole GraphQL request at 6 MiB, so a menu with many valid photos may still be too large to save in one request.
+- **Menu management is limited.** Each server save creates a new menu. The list shows the latest 20; editing and deleting saved menus are not implemented. Duplicate names in the same case-sensitive category cause a transaction rollback.
+- **Deployment and device coverage.** The sample bootstraps its schema at startup. A production service needs versioned migrations and appropriate database permissions. Native Android/iOS execution and GCP deployment have not been verified. A local live Go scan returned 22 items after an earlier attempt failed; this does not establish reliability.
 
-The database schema is bootstrapped at startup for a small demo; production would use versioned migrations, a restricted database role and a separate migration step. Native-device testing and GCP deployment remain unverified. A local live Go scan returned 22 items after an earlier attempt failed; this does not establish reliability. The old PHP sample's four-image results are **not** attributed to this implementation.
-
-The Expo build dependencies pin `minimatch` 11.0.1 and `glob` 14.0.2 via explicit overrides to address the advisory returned by npm audit; validate type checks, tests and web export when changing these overrides. It is not needed in the final Go/static-web runtime image.
+The Expo build dependencies pin `minimatch` 11.0.1 and `glob` 14.0.2 via explicit overrides to address an npm audit advisory. Validate checks and web export when changing these overrides.
 
 See [design](docs/DESIGN.md), [verification](docs/VERIFICATION.md), and [GCP deployment](docs/GCP.md).
 
