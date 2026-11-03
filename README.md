@@ -2,7 +2,15 @@
 
 A restaurant owner can turn a photographed menu into an editable draft, compare it with the original, and save the reviewed dishes together. The Go service treats model output as untrusted. The catalog supplies artwork and optional name suggestions while the restaurant keeps its own prices.
 
-[Try the hosted demo](https://menu-review.smartmade.site/) and choose **Review illustrated menu**. Change the price of a familiar dish, then add one outside the catalog. Both appear in the saved menu. The hosted demo runs in your browser and requires no credentials. The full application below uses Go, GraphQL, PostgreSQL and Expo. This is an AI-assisted reimplementation of an existing workflow.
+[Try the hosted demo](https://menu-review.smartmade.site/) and choose **Open menu demos**. Change the price of a familiar dish, then add one outside the catalog. Both appear in the saved menu. The hosted demo runs in your browser and requires no credentials. The full application below uses Go, GraphQL, PostgreSQL and Expo. This is an AI-assisted reimplementation of an existing workflow.
+
+## Compare recorded scans
+
+Choose a reference photo, then switch between Gemini 2.5 Flash-Lite, Qwen 3.7 Flash and DeepSeek V4.1 Flash. Each pairing replays one actual OpenRouter response. Expand **Original model response** to inspect it. The separate reference transcription is available for comparison.
+
+Across these three example photos (6, 6 and 22 dishes), each model matched all 34 reference name/price pairs, ignoring case and surrounding whitespace. This check covers printed names and prices only. OpenRouter reported $0.001571 in total for the nine calls. Replaying a result incurs no provider charge.
+
+The [recordings](client/src/demo-runs.json) include the input file hash, returned model, timestamp, usage, original text and normalized draft. The [recorder](server/cmd/record-demos/main.go) uses the application scanner prompt, temperature 0, a 2,500-token output limit and disabled reasoning in the request. From the server directory run `go run ./cmd/record-demos` with OPENROUTER_API_KEY in the environment. Existing recordings with matching image hashes are skipped.
 
 ## Run the complete application
 

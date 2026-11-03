@@ -1,3 +1,4 @@
+import recordings from "./src/demo-runs.json";
 import { useRef, useState, useEffect } from "react";
 import {
 	Platform,
@@ -30,10 +31,18 @@ import citrus from "./src/citrus.json";
 import lunch from "./src/lunch.json";
 import recorded from "./src/recorded.json";
 const publicDemo = process.env.EXPO_PUBLIC_RECORDED_DEMO === "1";
+
+const models = [
+    {id:"reference",name:"Reference transcription"},
+    {id:"qwen/qwen3.7-flash",name:"Qwen 3.7 Flash"},
+    {id:"google/gemini-2.5-flash-lite",name:"Gemini 2.5 Flash-Lite"},
+    {id:"deepseek/deepseek-v4.1-flash",name:"DeepSeek V4.1 Flash"},
+];
+const runs: Record<string,{draft:Draft;raw:string;returnedModel:string;recordedAt:string}> = recordings;
 const examples = [
-    {name:"Classic Indian menu", image:require("./assets/sample-clear.png"), draft:recorded, info:"Archived transcription · Gemini scan pending"},
-    {name:"Citrus Window · illustrated menu", image:require("./assets/citrus-window.png"), draft:citrus, info:"Illustrated reference · prepared transcription"},
-    {name:"Café Lunch Edition · two-column menu", image:require("./assets/lunch-edition.jpg"), draft:lunch, info:"Recreated restaurant menu · prepared transcription"},
+    {file:"sample-clear.png",name:"Classic Indian menu", image:require("./assets/sample-clear.png"), draft:recorded, info:"Reference transcription"},
+    {file:"citrus-window.png",name:"Citrus Window · illustrated menu", image:require("./assets/citrus-window.png"), draft:citrus, info:"Illustrated reference · prepared transcription"},
+    {file:"lunch-edition.jpg",name:"Café Lunch Edition · two-column menu", image:require("./assets/lunch-edition.jpg"), draft:lunch, info:"Recreated restaurant menu · prepared transcription"},
 ];
 const homeMotion = "@media(prefers-reduced-motion:no-preference){[data-testid=home-card]{animation:home-in .32s ease-out both;transition:transform .18s ease,box-shadow .18s ease}[data-testid=home-card]:hover{transform:translateY(-2px);box-shadow:0 8px 24px #512d1514}[role=button]{transition:opacity .15s ease,transform .15s ease}@keyframes home-in{from{opacity:.4;translate:0 6px}to{opacity:1;translate:0 0}}}";
 const storageKey = "menu-review.saved.v1";
@@ -111,7 +120,8 @@ export default function App() {
 	const [screen,setScreen]=useState<"upload"|"review"|"saved">("upload");
     const [error, setError] = useState("");
 	const [saved, setSaved] = useState<SavedMenu[]>([]);
-	const [sample,setSample]=useState(0);
+	const [model,setModel]=useState("google/gemini-2.5-flash-lite");
+    const [sample,setSample]=useState(0);
     useEffect(()=>{
         if(Platform.OS!=="web") return;
         const style=document.createElement("style");style.textContent=homeMotion;document.head.append(style);
@@ -119,6 +129,8 @@ export default function App() {
     },[]);
     const [setup,setSetup]=useState(false);
     const isSample=source==="SAMPLE MENU";
+    const selectedRun=runs[examples[sample].file+"|"+model];
+    const pending=isSample && model!=="reference" && !selectedRun;
 	const [currency, setCurrency] = useState("INR");
     const catalogDishes = house;
 	
@@ -154,9 +166,11 @@ export default function App() {
 		);
 		setSaved(data.menus);
 	}
-	function openExample(index:number) {
+	function openExample(index:number,selection=model) {
         const example=examples[index];
-        setSample(index);setCurrency(example.draft.currency);setItems(editDraft(example.draft));
+        const run=runs[example.file+"|"+selection];
+        const draft=selection==="reference"?example.draft:run?.draft;
+        setModel(selection);setSample(index);setCurrency(draft?.currency??"UNKNOWN");setItems(draft?editDraft(draft):[]);
         setName(example.name);setPhoto(null);setSource("SAMPLE MENU");setScreen("review");setError("");setMessage("");
     }
     function artwork(item: {name:string; photo?:string|null}) {
@@ -368,11 +382,16 @@ export default function App() {
 				{screen==="review" && (
 					<View style={styles.section}>
 						{isSample ? <View style={{gap:8,marginBottom:18}}>
-                            <Text style={styles.eyebrow}>MENU DEMOS</Text><Text style={styles.label}>{examples[sample].info}</Text>
+                            <Text style={styles.eyebrow}>MENU DEMOS</Text><Text style={styles.label}>{model==="reference"?examples[sample].info:"Recorded scan · reasoning disabled in request"}</Text>
                             <Image accessibilityLabel={examples[sample].name} source={examples[sample].image} resizeMode="contain" style={{width:"100%",height:360,backgroundColor:"#f5efe6",borderRadius:12}}/>
-                            {Platform.OS==="web"?<select aria-label="Choose menu photo" value={sample} disabled={busy} onChange={e=>openExample(Number(e.target.value))} style={{width:"100%",padding:14,fontSize:16,fontWeight:600,borderRadius:8,border:"1px solid #bfb5aa",background:"white"}}>{examples.map((x,i)=><option key={x.name} value={i}>{x.name}</option>)}</select>:examples.map((x,i)=><Button key={x.name} secondary={sample!==i} title={x.name} onPress={()=>openExample(i)}/>)}
+                            {Platform.OS==="web"?<select aria-label="Choose menu photo" value={sample} disabled={busy} onChange={e=>openExample(Number(e.target.value),model)} style={{width:"100%",padding:14,fontSize:16,fontWeight:600,borderRadius:8,border:"1px solid #bfb5aa",background:"white"}}>{examples.map((x,i)=><option key={x.name} value={i}>{x.name}</option>)}</select>:examples.map((x,i)=><Button key={x.name} secondary={sample!==i} title={x.name} onPress={()=>openExample(i)}/>)}
+                        <Text style={styles.label}>Model output</Text>
+                            {Platform.OS==="web"?<select aria-label="Choose model output" value={model} onChange={e=>openExample(sample,e.target.value)} style={{padding:14,width:"100%",borderRadius:8,fontSize:16}}>{models.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>:models.map(m=><Button key={m.id} title={m.name} secondary={model!==m.id} onPress={()=>openExample(sample,m.id)} />)}
+                            {pending && <Text accessibilityLiveRegion="polite" style={styles.notice}>No recorded scan yet for this photo and model. Choose Reference transcription to explore this menu.</Text>}
+                            {selectedRun && model!=="reference" && <><Text style={styles.small}>{selectedRun.returnedModel} · {selectedRun.recordedAt}</Text>{Platform.OS==="web" && <details><summary>Original model response</summary><pre style={{whiteSpace:"pre-wrap"}}>{selectedRun.raw}</pre></details>}</>}
                         </View>:<Text style={styles.eyebrow}>{source}</Text>}
-						<View style={styles.headingRow}>
+						{!pending && <>
+                        <View style={styles.headingRow}>
 							<Text style={styles.heading}>Check the details.</Text>
 							<Text style={styles.badge}>
 								{items.length} dishes · {invalid} need attention
@@ -560,7 +579,8 @@ export default function App() {
 							onPress={save}
 							disabled={busy}
 						/>
-					</View>
+					</>}
+                    </View>
 				)}
 				{screen==="saved" && <View style={styles.section}>
 					<Text style={styles.eyebrow}>{publicDemo ? "SAVED IN THIS BROWSER" : "PERSISTED IN POSTGRESQL"}</Text>

@@ -1,0 +1,1127 @@
+{
+  "citrus-window.png|deepseek/deepseek-v4.1-flash": {
+    "model": "deepseek/deepseek-v4.1-flash",
+    "returnedModel": "deepseek/deepseek-v4.1-flash",
+    "imageSha256": "101e793a18da3f8f88e4d2f9c31fc69d07943a9ec36b99b11da4f1d513ebdbcc",
+    "recordedAt": "2026-11-03T03:45:19Z",
+    "raw": "```json\n{\n  \"currency\": \"USD\",\n  \"categories\": [\n    {\n      \"name\": \"From the Grill\",\n      \"items\": [\n        {\n          \"name\": \"Charred corn\",\n          \"price\": 6.50,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 95\n        },\n        {\n          \"name\": \"Pepper melt\",\n          \"price\": 8.90,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 95\n        },\n        {\n          \"name\": \"Lime chicken\",\n          \"price\": 12.00,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 95\n        }\n      ]\n    },\n    {\n      \"name\": \"Cold Drinks\",\n      \"items\": [\n        {\n          \"name\": \"Ginger soda\",\n          \"price\": 3.50,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 95\n        },\n        {\n          \"name\": \"Cherry fizz\",\n          \"price\": 4.00,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 95\n        },\n        {\n          \"name\": \"Cold brew\",\n          \"price\": 4.80,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 95\n        }\n      ]\n    }\n  ]\n}\n```",
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "confidence": 95,
+          "category": "From the Grill",
+          "name": "Charred corn",
+          "priceMinor": 650,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 95,
+          "category": "From the Grill",
+          "name": "Pepper melt",
+          "priceMinor": 890,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 95,
+          "category": "From the Grill",
+          "name": "Lime chicken",
+          "priceMinor": 1200,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 95,
+          "category": "Cold Drinks",
+          "name": "Ginger soda",
+          "priceMinor": 350,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 95,
+          "category": "Cold Drinks",
+          "name": "Cherry fizz",
+          "priceMinor": 400,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 95,
+          "category": "Cold Drinks",
+          "name": "Cold brew",
+          "priceMinor": 480,
+          "vegetarian": null,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 1152,
+      "completion_tokens": 319,
+      "total_tokens": 1471,
+      "cost": 0.0001611,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0001611,
+        "upstream_inference_prompt_cost": 0.00010368,
+        "upstream_inference_completions_cost": 0.00005742
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "citrus-window.png|google/gemini-2.5-flash-lite": {
+    "model": "google/gemini-2.5-flash-lite",
+    "returnedModel": "google/gemini-2.5-flash-lite",
+    "imageSha256": "101e793a18da3f8f88e4d2f9c31fc69d07943a9ec36b99b11da4f1d513ebdbcc",
+    "recordedAt": "2026-11-03T03:45:14Z",
+    "raw": "{\"currency\":\"USD\",\"categories\":[{\"name\":\"FROM THE GRILL\",\"items\":[{\"name\":\"Charred corn\",\"price\":6.50,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Pepper melt\",\"price\":8.90,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Lime chicken\",\"price\":12.00,\"is_veg\":false,\"variations\":[],\"confidence\":99}]},{\"name\":\"COLD DRINKS\",\"items\":[{\"name\":\"Ginger soda\",\"price\":3.50,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Cherry fizz\",\"price\":4.00,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Cold brew\",\"price\":4.80,\"is_veg\":null,\"variations\":[],\"confidence\":99}]}]}",
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "confidence": 99,
+          "category": "FROM THE GRILL",
+          "name": "Charred corn",
+          "priceMinor": 650,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "FROM THE GRILL",
+          "name": "Pepper melt",
+          "priceMinor": 890,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "FROM THE GRILL",
+          "name": "Lime chicken",
+          "priceMinor": 1200,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "COLD DRINKS",
+          "name": "Ginger soda",
+          "priceMinor": 350,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "COLD DRINKS",
+          "name": "Cherry fizz",
+          "priceMinor": 400,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "COLD DRINKS",
+          "name": "Cold brew",
+          "priceMinor": 480,
+          "vegetarian": null,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 443,
+      "completion_tokens": 192,
+      "total_tokens": 635,
+      "cost": 0.0001211,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0001211,
+        "upstream_inference_prompt_cost": 0.0000443,
+        "upstream_inference_completions_cost": 0.0000768
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "citrus-window.png|qwen/qwen3.7-flash": {
+    "model": "qwen/qwen3.7-flash",
+    "returnedModel": "qwen/qwen3.7-flash",
+    "imageSha256": "101e793a18da3f8f88e4d2f9c31fc69d07943a9ec36b99b11da4f1d513ebdbcc",
+    "recordedAt": "2026-11-03T03:45:11Z",
+    "raw": "{\n  \"currency\": \"USD\",\n  \"categories\": [\n    {\n      \"name\": \"From the Grill\",\n      \"items\": [\n        {\n          \"name\": \"Charred corn\",\n          \"price\": 6.50,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 98\n        },\n        {\n          \"name\": \"Pepper melt\",\n          \"price\": 8.90,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 97\n        },\n        {\n          \"name\": \"Lime chicken\",\n          \"price\": 12.00,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 99\n        }\n      ]\n    },\n    {\n      \"name\": \"Cold Drinks\",\n      \"items\": [\n        {\n          \"name\": \"Ginger soda\",\n          \"price\": 3.50,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 98\n        },\n        {\n          \"name\": \"Cherry fizz\",\n          \"price\": 4.00,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 97\n        },\n        {\n          \"name\": \"Cold brew\",\n          \"price\": 4.80,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 99\n        }\n      ]\n    }\n  ]\n}",
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "confidence": 98,
+          "category": "From the Grill",
+          "name": "Charred corn",
+          "priceMinor": 650,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 97,
+          "category": "From the Grill",
+          "name": "Pepper melt",
+          "priceMinor": 890,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "From the Grill",
+          "name": "Lime chicken",
+          "priceMinor": 1200,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 98,
+          "category": "Cold Drinks",
+          "name": "Ginger soda",
+          "priceMinor": 350,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 97,
+          "category": "Cold Drinks",
+          "name": "Cherry fizz",
+          "priceMinor": 400,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Cold Drinks",
+          "name": "Cold brew",
+          "priceMinor": 480,
+          "vegetarian": true,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 1740,
+      "completion_tokens": 376,
+      "total_tokens": 2116,
+      "cost": 0.000116242,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000116242,
+        "upstream_inference_prompt_cost": 0.00006003,
+        "upstream_inference_completions_cost": 0.000056212
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "lunch-edition.jpg|deepseek/deepseek-v4.1-flash": {
+    "model": "deepseek/deepseek-v4.1-flash",
+    "returnedModel": "deepseek/deepseek-v4.1-flash",
+    "imageSha256": "365150b5f8b7f9a3f7b90d3b5dba0ac5b9961db949341842213d24eab322726f",
+    "recordedAt": "2026-11-03T03:45:47Z",
+    "raw": "```json\n{\n  \"currency\": \"USD\",\n  \"categories\": [\n    {\n      \"name\": \"Kitchen\",\n      \"items\": [\n        {\n          \"name\": \"Grilled Chicken Caesar Salad\",\n          \"price\": 12.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Classic Club Sandwich\",\n          \"price\": 10.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Spinach and Feta Stuffed Chicken\",\n          \"price\": 14.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Vegetable Quinoa Bowl\",\n          \"price\": 11.99,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"BBQ Pulled Pork Sandwich\",\n          \"price\": 9.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Caprese Panini\",\n          \"price\": 8.99,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Fish Tacos\",\n          \"price\": 13.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Mushroom and Swiss Burger\",\n          \"price\": 12.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Quiche Lorraine\",\n          \"price\": 10.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Mediterranean Pasta\",\n          \"price\": 13.99,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Asian Chicken Salad\",\n          \"price\": 11.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Beef Stir-Fry\",\n          \"price\": 15.99,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Margherita Pizza\",\n          \"price\": 14.99,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Roasted Vegetable Wrap\",\n          \"price\": 9.99,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Soup of the Day\",\n          \"price\": 5.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        }\n      ]\n    },\n    {\n      \"name\": \"Beverages\",\n      \"items\": [\n        {\n          \"name\": \"Soft Drinks\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Iced Tea\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Freshly Squeezed Lemonade\",\n          \"price\": 3.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Fruit Smoothies\",\n          \"price\": 4.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Coffee\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Hot Tea\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Bottled Water\",\n          \"price\": 1.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        }\n      ]\n    }\n  ]\n}\n```",
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Grilled Chicken Caesar Salad",
+          "priceMinor": 1299,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Classic Club Sandwich",
+          "priceMinor": 1099,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Spinach and Feta Stuffed Chicken",
+          "priceMinor": 1499,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Vegetable Quinoa Bowl",
+          "priceMinor": 1199,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "BBQ Pulled Pork Sandwich",
+          "priceMinor": 999,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Caprese Panini",
+          "priceMinor": 899,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Fish Tacos",
+          "priceMinor": 1399,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Mushroom and Swiss Burger",
+          "priceMinor": 1299,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Quiche Lorraine",
+          "priceMinor": 1099,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Mediterranean Pasta",
+          "priceMinor": 1399,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Asian Chicken Salad",
+          "priceMinor": 1199,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Beef Stir-Fry",
+          "priceMinor": 1599,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Margherita Pizza",
+          "priceMinor": 1499,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Roasted Vegetable Wrap",
+          "priceMinor": 999,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Soup of the Day",
+          "priceMinor": 599,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Soft Drinks",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Iced Tea",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Freshly Squeezed Lemonade",
+          "priceMinor": 399,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Fruit Smoothies",
+          "priceMinor": 499,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Coffee",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Hot Tea",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Bottled Water",
+          "priceMinor": 199,
+          "vegetarian": null,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 1060,
+      "completion_tokens": 1033,
+      "total_tokens": 2093,
+      "cost": 0.00028134,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00028134,
+        "upstream_inference_prompt_cost": 0.0000954,
+        "upstream_inference_completions_cost": 0.00018594
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "lunch-edition.jpg|google/gemini-2.5-flash-lite": {
+    "model": "google/gemini-2.5-flash-lite",
+    "returnedModel": "google/gemini-2.5-flash-lite",
+    "imageSha256": "365150b5f8b7f9a3f7b90d3b5dba0ac5b9961db949341842213d24eab322726f",
+    "recordedAt": "2026-11-03T03:45:42Z",
+    "raw": "{\"currency\":\"USD\",\"categories\":[{\"name\":\"Kitchen\",\"items\":[{\"name\":\"Grilled Chicken Caesar Salad\",\"price\":12.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Classic Club Sandwich\",\"price\":10.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Spinach and Feta Stuffed Chicken\",\"price\":14.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Vegetable Quinoa Bowl\",\"price\":11.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"BBQ Pulled Pork Sandwich\",\"price\":9.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Caprese Panini\",\"price\":8.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Fish Tacos\",\"price\":13.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Mushroom and Swiss Burger\",\"price\":12.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Quiche Lorraine\",\"price\":10.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Mediterranean Pasta\",\"price\":13.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Asian Chicken Salad\",\"price\":11.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Beef Stir-Fry\",\"price\":15.99,\"is_veg\":false,\"variations\":[],\"confidence\":99},{\"name\":\"Margherita Pizza\",\"price\":14.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Roasted Vegetable Wrap\",\"price\":9.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Soup of the Day\",\"price\":5.99,\"is_veg\":null,\"variations\":[],\"confidence\":99}]},{\"name\":\"Beverages\",\"items\":[{\"name\":\"Soft Drinks\",\"price\":2.99,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Iced Tea\",\"price\":2.99,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Freshly Squeezed Lemonade\",\"price\":3.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Fruit Smoothies\",\"price\":4.99,\"is_veg\":true,\"variations\":[],\"confidence\":99},{\"name\":\"Coffee\",\"price\":2.99,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Hot Tea\",\"price\":2.99,\"is_veg\":null,\"variations\":[],\"confidence\":99},{\"name\":\"Bottled Water\",\"price\":1.99,\"is_veg\":null,\"variations\":[],\"confidence\":99}]}]}",
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Grilled Chicken Caesar Salad",
+          "priceMinor": 1299,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Classic Club Sandwich",
+          "priceMinor": 1099,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Spinach and Feta Stuffed Chicken",
+          "priceMinor": 1499,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Vegetable Quinoa Bowl",
+          "priceMinor": 1199,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "BBQ Pulled Pork Sandwich",
+          "priceMinor": 999,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Caprese Panini",
+          "priceMinor": 899,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Fish Tacos",
+          "priceMinor": 1399,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Mushroom and Swiss Burger",
+          "priceMinor": 1299,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Quiche Lorraine",
+          "priceMinor": 1099,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Mediterranean Pasta",
+          "priceMinor": 1399,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Asian Chicken Salad",
+          "priceMinor": 1199,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Beef Stir-Fry",
+          "priceMinor": 1599,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Margherita Pizza",
+          "priceMinor": 1499,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Roasted Vegetable Wrap",
+          "priceMinor": 999,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Kitchen",
+          "name": "Soup of the Day",
+          "priceMinor": 599,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Soft Drinks",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Iced Tea",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Freshly Squeezed Lemonade",
+          "priceMinor": 399,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Fruit Smoothies",
+          "priceMinor": 499,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Coffee",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Hot Tea",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 99,
+          "category": "Beverages",
+          "name": "Bottled Water",
+          "priceMinor": 199,
+          "vegetarian": null,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 443,
+      "completion_tokens": 665,
+      "total_tokens": 1108,
+      "cost": 0.0003103,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0003103,
+        "upstream_inference_prompt_cost": 0.0000443,
+        "upstream_inference_completions_cost": 0.000266
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "lunch-edition.jpg|qwen/qwen3.7-flash": {
+    "model": "qwen/qwen3.7-flash",
+    "returnedModel": "qwen/qwen3.7-flash",
+    "imageSha256": "365150b5f8b7f9a3f7b90d3b5dba0ac5b9961db949341842213d24eab322726f",
+    "recordedAt": "2026-11-03T03:45:39Z",
+    "raw": "{\n  \"currency\": \"USD\",\n  \"categories\": [\n    {\n      \"name\": \"Kitchen\",\n      \"items\": [\n        {\n          \"name\": \"Grilled Chicken Caesar Salad\",\n          \"price\": 12.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Classic Club Sandwich\",\n          \"price\": 10.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Spinach and Feta Stuffed Chicken\",\n          \"price\": 14.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Vegetable Quinoa Bowl\",\n          \"price\": 11.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"BBQ Pulled Pork Sandwich\",\n          \"price\": 9.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Caprese Panini\",\n          \"price\": 8.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Fish Tacos\",\n          \"price\": 13.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Mushroom and Swiss Burger\",\n          \"price\": 12.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Quiche Lorraine\",\n          \"price\": 10.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Mediterranean Pasta\",\n          \"price\": 13.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Asian Chicken Salad\",\n          \"price\": 11.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Beef Stir-Fry\",\n          \"price\": 15.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Margherita Pizza\",\n          \"price\": 14.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Roasted Vegetable Wrap\",\n          \"price\": 9.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Soup of the Day\",\n          \"price\": 5.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        }\n      ]\n    },\n    {\n      \"name\": \"Beverages\",\n      \"items\": [\n        {\n          \"name\": \"Soft Drinks\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Iced Tea\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Freshly Squeezed Lemonade\",\n          \"price\": 3.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Fruit Smoothies\",\n          \"price\": 4.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Coffee\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Hot Tea\",\n          \"price\": 2.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Bottled Water\",\n          \"price\": 1.99,\n          \"is_veg\": null,\n          \"variations\": [],\n          \"confidence\": 100\n        }\n      ]\n    }\n  ]\n}",
+    "draft": {
+      "currency": "USD",
+      "items": [
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Grilled Chicken Caesar Salad",
+          "priceMinor": 1299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Classic Club Sandwich",
+          "priceMinor": 1099,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Spinach and Feta Stuffed Chicken",
+          "priceMinor": 1499,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Vegetable Quinoa Bowl",
+          "priceMinor": 1199,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "BBQ Pulled Pork Sandwich",
+          "priceMinor": 999,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Caprese Panini",
+          "priceMinor": 899,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Fish Tacos",
+          "priceMinor": 1399,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Mushroom and Swiss Burger",
+          "priceMinor": 1299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Quiche Lorraine",
+          "priceMinor": 1099,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Mediterranean Pasta",
+          "priceMinor": 1399,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Asian Chicken Salad",
+          "priceMinor": 1199,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Beef Stir-Fry",
+          "priceMinor": 1599,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Margherita Pizza",
+          "priceMinor": 1499,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Roasted Vegetable Wrap",
+          "priceMinor": 999,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Kitchen",
+          "name": "Soup of the Day",
+          "priceMinor": 599,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Soft Drinks",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Iced Tea",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Freshly Squeezed Lemonade",
+          "priceMinor": 399,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Fruit Smoothies",
+          "priceMinor": 499,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Coffee",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Hot Tea",
+          "priceMinor": 299,
+          "vegetarian": null,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Beverages",
+          "name": "Bottled Water",
+          "priceMinor": 199,
+          "vegetarian": null,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 1648,
+      "completion_tokens": 1252,
+      "total_tokens": 2900,
+      "cost": 0.00024403,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00024403,
+        "upstream_inference_prompt_cost": 0.000056856,
+        "upstream_inference_completions_cost": 0.000187174
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "sample-clear.png|deepseek/deepseek-v4.1-flash": {
+    "model": "deepseek/deepseek-v4.1-flash",
+    "returnedModel": "deepseek/deepseek-v4.1-flash",
+    "imageSha256": "9844ac552af1ad2aee9e70e2089817754923664a56ef82d9a295f0f7cdfb4a2b",
+    "recordedAt": "2026-11-03T03:44:54Z",
+    "raw": "{\"currency\":\"INR\",\"categories\":[{\"name\":\"Menu\",\"items\":[{\"name\":\"Paneer Tikka\",\"price\":250,\"is_veg\":true,\"variations\":[],\"confidence\":100},{\"name\":\"Chicken Tikka\",\"price\":320,\"is_veg\":false,\"variations\":[],\"confidence\":100},{\"name\":\"Dal Tadka\",\"price\":180,\"is_veg\":true,\"variations\":[],\"confidence\":100},{\"name\":\"Butter Naan\",\"price\":45,\"is_veg\":true,\"variations\":[],\"confidence\":100},{\"name\":\"Jeera Rice\",\"price\":140,\"is_veg\":true,\"variations\":[],\"confidence\":100},{\"name\":\"Mango Lassi\",\"price\":90,\"is_veg\":true,\"variations\":[],\"confidence\":100}]}]}",
+    "draft": {
+      "currency": "INR",
+      "items": [
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Paneer Tikka",
+          "priceMinor": 25000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Chicken Tikka",
+          "priceMinor": 32000,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Dal Tadka",
+          "priceMinor": 18000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Butter Naan",
+          "priceMinor": 4500,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Jeera Rice",
+          "priceMinor": 14000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Mango Lassi",
+          "priceMinor": 9000,
+          "vegetarian": true,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 1135,
+      "completion_tokens": 173,
+      "total_tokens": 1308,
+      "cost": 0.00013329,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00013329,
+        "upstream_inference_prompt_cost": 0.00010215,
+        "upstream_inference_completions_cost": 0.00003114
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "sample-clear.png|google/gemini-2.5-flash-lite": {
+    "model": "google/gemini-2.5-flash-lite",
+    "returnedModel": "google/gemini-2.5-flash-lite",
+    "imageSha256": "9844ac552af1ad2aee9e70e2089817754923664a56ef82d9a295f0f7cdfb4a2b",
+    "recordedAt": "2026-11-03T03:44:52Z",
+    "raw": "```json\n{\"currency\":\"INR\",\"categories\":[{\"name\":\"Menu\",\"items\":[{\"name\":\"Paneer Tikka\",\"price\":250,\"is_veg\":true,\"variations\":[]},{\"name\":\"Chicken Tikka\",\"price\":320,\"is_veg\":false,\"variations\":[]},{\"name\":\"Dal Tadka\",\"price\":180,\"is_veg\":true,\"variations\":[]},{\"name\":\"Butter Naan\",\"price\":45,\"is_veg\":true,\"variations\":[]},{\"name\":\"Jeera Rice\",\"price\":140,\"is_veg\":true,\"variations\":[]},{\"name\":\"Mango Lassi\",\"price\":90,\"is_veg\":true,\"variations\":[]}]}]}\n```",
+    "draft": {
+      "currency": "INR",
+      "items": [
+        {
+          "category": "Menu",
+          "name": "Paneer Tikka",
+          "priceMinor": 25000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Menu",
+          "name": "Chicken Tikka",
+          "priceMinor": 32000,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "category": "Menu",
+          "name": "Dal Tadka",
+          "priceMinor": 18000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Menu",
+          "name": "Butter Naan",
+          "priceMinor": 4500,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Menu",
+          "name": "Jeera Rice",
+          "priceMinor": 14000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "category": "Menu",
+          "name": "Mango Lassi",
+          "priceMinor": 9000,
+          "vegetarian": true,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 443,
+      "completion_tokens": 156,
+      "total_tokens": 599,
+      "cost": 0.0001067,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0001067,
+        "upstream_inference_prompt_cost": 0.0000443,
+        "upstream_inference_completions_cost": 0.0000624
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "sample-clear.png|qwen/qwen3.7-flash": {
+    "model": "qwen/qwen3.7-flash",
+    "returnedModel": "qwen/qwen3.7-flash",
+    "imageSha256": "9844ac552af1ad2aee9e70e2089817754923664a56ef82d9a295f0f7cdfb4a2b",
+    "recordedAt": "2026-11-03T03:44:50Z",
+    "raw": "{\n  \"currency\": \"INR\",\n  \"categories\": [\n    {\n      \"name\": \"Menu\",\n      \"items\": [\n        {\n          \"name\": \"Paneer Tikka\",\n          \"price\": 250,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Chicken Tikka\",\n          \"price\": 320,\n          \"is_veg\": false,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Dal Tadka\",\n          \"price\": 180,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Butter Naan\",\n          \"price\": 45,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Jeera Rice\",\n          \"price\": 140,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        },\n        {\n          \"name\": \"Mango Lassi\",\n          \"price\": 90,\n          \"is_veg\": true,\n          \"variations\": [],\n          \"confidence\": 100\n        }\n      ]\n    }\n  ]\n}",
+    "draft": {
+      "currency": "INR",
+      "items": [
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Paneer Tikka",
+          "priceMinor": 25000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Chicken Tikka",
+          "priceMinor": 32000,
+          "vegetarian": false,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Dal Tadka",
+          "priceMinor": 18000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Butter Naan",
+          "priceMinor": 4500,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Jeera Rice",
+          "priceMinor": 14000,
+          "vegetarian": true,
+          "variants": []
+        },
+        {
+          "confidence": 100,
+          "category": "Menu",
+          "name": "Mango Lassi",
+          "priceMinor": 9000,
+          "vegetarian": true,
+          "variants": []
+        }
+      ]
+    },
+    "usage": {
+      "prompt_tokens": 1700,
+      "completion_tokens": 352,
+      "total_tokens": 2052,
+      "cost": 0.00009676,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00009676,
+        "upstream_inference_prompt_cost": 0.000051,
+        "upstream_inference_completions_cost": 0.00004576
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  }
+}
