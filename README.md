@@ -1,33 +1,34 @@
-# Menu Review — Go / GraphQL / Expo / PostgreSQL
+# Menu Import
 
 A restaurant owner can turn a menu photo into an editable draft, check it against the original, and save the reviewed dishes together. This is a focused, AI-assisted reimplementation of a menu-import workflow from my Billing project.
 
 **[Open the hosted demo](https://menu-review.smartmade.site/)** → **Open menu demos**. Choose a photo and a model to inspect its recorded output. Recorded menus can be edited and saved in the same browser without a token. Those demo saves stay on that browser and device. Live scanning and restaurant database saves require a configured server and operator token, as described below.
 
-## Why this project
+**Developer handoff** · [Architecture and source map](ARCHITECTURE.md) · [GraphQL contract](server/internal/api/schema.graphql) · [Run the tests](#run-tests)
 
-My longer-term goal is restaurant software where an owner can use voice to record incoming stock or enter a table order, with the relevant information reaching the kitchen and cashier. AI would reduce manual entry while people verify important details. This sample explores one step toward that idea: extracting a menu from a photo and letting the owner correct it before saving.
+## What you can try
 
-Voice control, inventory updates, kitchen routing and cashier integration are future ideas. They are not implemented in this sample.
+| Entry point | What happens | What you need |
+|---|---|---|
+| Recorded demo | Choose one of three photos and a recorded model response. Compare the image, edit a dish, add a missing dish or attach a photo. Save the result in this browser. | A web browser |
+| Live import | Upload one JPEG or PNG. The Go service requests a transcription through OpenRouter and returns an editable draft. | A configured server, provider key and operator token |
+| Restaurant save | Save a valid draft to PostgreSQL. Reopen saved menus to read it back. A failed dish insert rolls back the complete save. | An operator token and a running database |
 
-## How it works
-
-1. A Go server sends a PNG or JPEG to the configured vision provider. Recorded examples can also be replayed without an API key.
-2. The server checks the response structure, keeps unreadable prices and dietary labels unresolved, and rejects incomplete responses.
-3. The owner reviews the draft, can correct prices and portions, and can accept a close name suggestion or add a dish the model missed. A small catalog provides illustrations for matching dish names; it does not replace restaurant prices.
-4. The reviewed menu is saved to PostgreSQL in a transaction. A test forces a failure during item insertion and checks that the menu rolls back.
-
-Prices are integer minor units for INR or USD. Ambiguous currency requires confirmation. A model confidence percentage is its self-assessment, not a calibrated probability of correctness.
+The ten-dish catalog supplies illustrations and suggests close spelling matches. Accepting a suggestion changes the name and category. The restaurant keeps control of prices, dietary labels and dishes outside the catalog. “Mark as verified” helps the operator track progress during review. It is optional and is not stored with the menu.
 
 ## Recorded model results
 
 Three synthetic menu images were scanned once each with three models through OpenRouter. The table counts matching **dish-name and price pairs**, ignoring name case and surrounding whitespace. It does not score categories, dietary labels, confidence, latency or real-world accuracy.
 
-| Model | Simple menu | Illustrated menu | Two-column menu | Total |
-|---|---:|---:|---:|---:|
-| Qwen 3.7 Flash | 6/6 | 6/6 | 22/22 | 34/34 |
-| Gemini 2.5 Flash-Lite | 6/6 | 6/6 | 22/22 | 34/34 |
-| DeepSeek V4.1 Flash | 6/6 | 6/6 | 22/22 | 34/34 |
+Select an image to inspect the exact input at full resolution. Each cell counts matching name/price pairs against that image’s reference transcription.
+
+| Recorded input | Classic Indian menu | Citrus Window | Café Lunch Edition |
+|---|---|---|---|
+| Source photo | <a href="client/assets/sample-clear.png"><img src="client/assets/sample-clear.png" width="160" alt="Classic Indian menu source menu"></a> | <a href="client/assets/citrus-window.png"><img src="client/assets/citrus-window.png" width="160" alt="Citrus Window source menu"></a> | <a href="client/assets/lunch-edition.jpg"><img src="client/assets/lunch-edition.jpg" width="160" alt="Café Lunch Edition source menu"></a> |
+| Reference | [6 dishes, plain print](client/src/recorded.json) | [6 dishes, illustrations](client/src/citrus.json) | [22 dishes, two columns](client/src/lunch.json) |
+| `qwen/qwen3.7-flash` | 6/6 | 6/6 | 22/22 |
+| `google/gemini-2.5-flash-lite` | 6/6 | 6/6 | 22/22 |
+| `deepseek/deepseek-v4.1-flash` | 6/6 | 6/6 | 22/22 |
 
 **Dietary labels need particular care.** The illustrated and two-column menus contain no printed dietary labels, yet some models supplied them despite being instructed to leave them unspecified. A valid-looking AI result is not proof that the source supports it. The owner must check the original image.
 
@@ -35,7 +36,7 @@ The [recordings](client/src/demo-runs.json) contain the image hash, model, time,
 
 ## Relationship to Billing
 
-Billing already has owner-reviewed menu import, multi-photo handling, provider fallback and a transactional import into a restaurant's actual menu. This repository does not integrate with Billing or replace those features. It reimplements a narrower workflow using Go, GraphQL, PostgreSQL, TypeScript, React and Expo, and adds integer minor-unit prices, currency review, catalog suggestions and a public comparison of recorded model outputs. It currently handles one photo per scan.
+Billing already has owner-reviewed menu import, multi-photo handling, provider fallback and a transactional import into a restaurant's actual menu. This repository does not integrate with Billing or replace those features. It reimplements a narrower workflow using Go, GraphQL, PostgreSQL, TypeScript, React and Expo, and adds integer minor-unit prices, currency review, catalog suggestions and a public comparison of recorded model outputs. It currently handles one photo per scan. My longer-term goal is to let an owner record incoming stock and route table orders by voice. Inventory, voice input and kitchen routing are outside this sample.
 
 ## Run the complete application
 
@@ -81,24 +82,15 @@ npx expo export --platform web
 
 The Docker build runs the client checks too. Go unit tests can run without Postgres using `go test ./...`, but the integration test will explicitly skip unless `TEST_DATABASE_URL` is set. Do not mistake that for a complete verification run.
 
-## What to review
+## Integrating the importer
 
-| File | Responsibility |
-|---|---|
-| `server/internal/menu/normalize.go` | Strict output structure, three-state dietary labels, exact decimal-to-minor-unit parsing |
-| `server/internal/menu/scanner.go` | Image bounds, request context, bounded retries and provider response validation |
-| `server/internal/api/schema.graphql` | Explicit API contract separating extraction from saving |
-| `server/internal/api/graphql.go` | GraphQL resolvers, operator token, request bounds, save validation |
-| `server/internal/store/postgres.go` | Transactional persistence and parameterized SQL |
-| `server/internal/store/postgres_test.go` | Actual PostgreSQL round trip and rollback proof |
-| `client/src/menu.ts` | Editable draft model and integer-price conversion |
-| `client/App.tsx` | Coordinates scanning, review and saving |
-| `client/src/ImportScreen.tsx` | Import and recorded-demo entry points |
-| `client/src/DishEditor.tsx` | Editable dish fields and catalog suggestions |
-| `client/src/SavedMenus.tsx` | Saved menu display |
-| `client/src/controls.tsx` and `client/src/styles.ts` | Shared UI controls and styling |
+A second client can use the same [GraphQL schema](server/internal/api/schema.graphql). POST to `/graphql` with the operator token in `X-Review-Token`. Keep the OpenRouter key on the Go server.
 
-Prices use integer minor units for INR or USD. Dietary labels may remain unspecified. Save rejects invalid base prices and invalid portions; it does not silently discard them. Provider requests use one bounded retry for transient failures and respect the request context. Invalid model JSON or an incomplete response is rejected.
+1. Call `scanMenu(image: ...)` with a JPEG or PNG data URI. Render the returned currency, dishes, prices and portions as an editable draft. Scanning does not write to the database.
+2. Preserve missing values during editing. For example, `priceMinor: 1010` means 10.10 in the selected currency. A missing price needs correction. A missing dietary label can remain unspecified.
+3. Pass the edited data to `saveMenu(input: ...)` after the operator chooses Save. Use `menus` to read back the latest 20 menus. A timeout after save can mean the write already committed. Check the list before retrying.
+
+To connect a different storage system, start at the [repository interface](server/internal/api/graphql.go) and its [PostgreSQL implementation](server/internal/store/postgres.go). A Billing integration would also need restaurant identity and a mapping to its existing menu records. The sample currently writes to its own database. See the [architecture guide](ARCHITECTURE.md) for field ownership, validation, failure paths and tests to run when changing the contract.
 
 ## Stack coverage
 

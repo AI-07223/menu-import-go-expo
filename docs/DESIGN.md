@@ -4,7 +4,7 @@ The new stack serves the same product need as the Laravel workflow. It is intent
 
 ## Ownership of data
 
-AI returns untrusted JSON. Go validates the response structure and turns uncertain prices and dietary flags into null. The client retains that uncertainty, shows editable fields, and requires review. The save resolver validates again because clients can bypass UI checks.
+AI returns untrusted JSON. Go validates the response structure and turns uncertain prices and dietary flags into null. The client retains that uncertainty, shows editable fields and blocks saving until required fields are valid. Marking each dish as verified is optional. The save resolver validates again because clients can bypass UI checks.
 
 A model may still return a confident but wrong value. Null handling does not detect every hallucination; the owner must compare the draft with the source image. The prompt is not a security boundary. The provider cannot execute tools or write to the database.
 
