@@ -68,7 +68,7 @@ func main() {
 		defer cancel()
 		server.Shutdown(ctx)
 	}()
-	slog.Info("menu review ready", "address", server.Addr, "liveProviders", len(scanner.Providers))
+	slog.Info("menu import ready", "address", server.Addr, "liveProviders", len(scanner.Providers))
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		slog.Error("HTTP server stopped")
 		os.Exit(1)

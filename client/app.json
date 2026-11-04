@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Menu Review",
-    "slug": "menu-review",
+    "name": "Menu Import",
+    "slug": "menu-import",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

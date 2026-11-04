@@ -2,7 +2,7 @@
 
 ## Current web sample
 
-At [release eed17f7](https://github.com/AI-07223/menu-review-go-expo/commit/eed17f7), the hosted recorded-demo flow was exercised at 1440, 900, 390 and 320 pixels. Checks covered column count, horizontal overflow, editing a dish and saving in browser storage. The [CI run](https://github.com/AI-07223/menu-review-go-expo/actions/runs/41686300646) separately built the app and ran the automated suite. These browser checks did not exercise a new paid scan or a native device.
+At [release eed17f7](https://github.com/AI-07223/menu-import-go-expo/commit/eed17f7), the hosted recorded-demo flow was exercised at 1440, 900, 390 and 320 pixels. Checks covered column count, horizontal overflow, editing a dish and saving in browser storage. The [CI run](https://github.com/AI-07223/menu-import-go-expo/actions/runs/41686300646) separately built the app and ran the automated suite. These browser checks did not exercise a new paid scan or a native device.
 
 The [current recordings and source images](../README.md#recorded-model-results) supersede the earlier experiment below.
 
