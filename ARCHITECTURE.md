@@ -63,6 +63,25 @@ To connect Billing, an engineer would need to map dishes and portions to Billing
 - **Sample scope.** Live import accepts a single photo. PDF and multi-page import are outside this sample. One operator credential protects the API. Shared restaurant use would require tenant isolation, rate limits and migrations. Dish photos can individually meet their size limit yet exceed the combined 6 MiB request limit. Saved menus have no edit or delete operation. Native-device and GCP execution remain unverified. [Scope and limits](README.md#limitations)
 - **Verification.** CI runs Go race tests against PostgreSQL, client tests, type checking, a web build and a database health check. For storage changes, run the Compose test profile so the rollback test uses a real database. For changes to price handling, check both parsers. For prompt changes, compare new recordings with the reference transcription and retain the raw output. [Test commands](README.md#run-tests) · [Verification record](docs/VERIFICATION.md)
 
+## Replaying a scan and checking a deployment
+
+The recorder requests temperature zero, a 2,500-token output limit and disabled reasoning. The live scanner also requests temperature zero but leaves the output limit and reasoning settings to the provider. These are request settings, not measurements of the model’s internal effort. To investigate a discrepancy, start with the stored image hash, returned model ID and raw response. If the raw response contains the error, changing the parser will not fix that recording. If only the draft is wrong, inspect normalization. [Recorder](server/cmd/record-demos/main.go) · [Live scanner](server/internal/menu/scanner.go) · [Recorded data](client/src/demo-runs.json)
+
+`GET /healthz` gives PostgreSQL two seconds to answer a ping. A database failure returns HTTP 503. A healthy response establishes database connectivity only. If recorded playback succeeds but a live upload fails, check the operator token, the server’s OpenRouter configuration and the scan response. Recorded playback never calls the provider. [Health handler and provider setup](server/cmd/server/main.go)
+
+## Developer handoff
+
+| When changing | Start here | What to check |
+|---|---|---|
+| Provider or extraction prompt | [Scanner](server/internal/menu/scanner.go), [recorder](server/cmd/record-demos/main.go) | [Scanner tests](server/internal/menu/scanner_test.go) for retry, cancellation and invalid responses. Compare new output with the source image. |
+| Price or dietary rules | [Normalizer](server/internal/menu/normalize.go), [save validation](server/internal/menu/model.go), [client fields](client/src/menu.ts) | Run [Go parsing tests](server/internal/menu/normalize_test.go) and [client tests](client/tests/menu.test.ts). Preserve the distinction between zero, missing and false. |
+| GraphQL fields or authorization | [Schema](server/internal/api/schema.graphql), [handler](server/internal/api/graphql.go), [client requests](client/src/api.ts) | Follow the fields through [App](client/App.tsx) and run [API tests](server/internal/api/graphql_test.go). |
+| SQL or menu persistence | [Schema](server/internal/store/schema.sql), [store](server/internal/store/postgres.go) | Run [round-trip and rollback tests](server/internal/store/postgres_test.go) with the Compose test profile. Without `TEST_DATABASE_URL`, the integration test skips. |
+| Catalog or demo behavior | [Matcher](client/src/matching.ts), [catalog](client/public/kitchen/catalog.json), [demo storage](client/src/demoStorage.ts) | Check [ties and image hashes](client/tests/catalog.test.ts) and [browser saves](client/tests/demoStorage.test.ts). |
+| Review screens | [Import](client/src/ImportScreen.tsx), [model selection](client/src/DemoSelector.tsx), [dish editor](client/src/DishEditor.tsx), [saved menus](client/src/SavedMenus.tsx) | Open a recording, edit a price, save and reopen it. Check both phone and desktop widths. |
+
+The [CI workflow](.github/workflows/checks.yml) exercises the database, builds the client and checks service health. Interactive browser checks and paid provider evaluations are separate verification steps. Startup SQL runs under a PostgreSQL advisory lock to serialize concurrent application starts. A team adopting the sample should plan versioned migrations before making changes to an existing restaurant database. [Verification record](docs/VERIFICATION.md) · [Schema bootstrap](server/internal/store/postgres.go)
+
 ## Authorship
 
 The workflow comes from my Billing project. I used extensive AI assistance to prepare this implementation, its tests and this document.
